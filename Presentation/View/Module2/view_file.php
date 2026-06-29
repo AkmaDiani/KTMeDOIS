@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . "/../Model/db.php";
-require_once __DIR__ . "/DOService.php";
+require_once __DIR__ . "/../../Application/Controllers/DOService.php";
 
 session_start();
 
