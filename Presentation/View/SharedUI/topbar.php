@@ -30,11 +30,11 @@
             <nav class="topbar-nav">
                 <ul>
                     
-                    <li><a href="#" class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">Manage Vendor</a></li>
-                    <li><a href="#" class="<?= $activePage === 'manage_do' ? 'active' : '' ?>">Manage Delivery Order</a></li>
+                    <li><a href="/KTMEDOIS/Presentation/Public/index.php?action=manage_vendor" class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">Manage Vendor</a></li>
+                    <li><a href="/KTMEDOIS/Presentation/Public/index.php?action=manage_do" class="<?= $activePage === 'manage_do' ? 'active' : '' ?>">Manage Delivery Order</a></li>
                     <li><a href="/KTMEDOIS/Presentation/Public/index.php?action=invoice_status" class="<?= $activePage === 'invoice_status' ? 'active' : '' ?>">Manage Invoice</a></li>
-                    <li><a href="#" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Manage & Review Approved Document</a></li>
-                    <li><a href="#" class="<?= $activePage === 'notifications' ? 'active' : '' ?>">Notifications</a></li>
+                    <li><a href="/KTMEDOIS/Presentation/Public/index.php?action=review_document" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Manage & Review Approved Document</a></li>
+                    <li><a href="/KTMEDOIS/Presentation/Public/index.php?action=notifications" class="<?= $activePage === 'notifications' ? 'active' : '' ?>">Notifications</a></li>
                     <li><a href="#" class="<?= $activePage === 'user' ? 'active' : '' ?>">User</a></li>
                 </ul>
             </nav>
