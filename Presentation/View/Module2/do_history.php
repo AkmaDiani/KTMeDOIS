@@ -4,7 +4,21 @@ require_once __DIR__ . "/../../../Application/Controller/DOService.php";
 
 session_start();
 
-$supplier_id = $_SESSION['supplier_id'];
+// Get database connection
+$pdo = Database::getInstance()->getConnection();
+
+// Check authentication
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Vendor') {
+    header('Location: /KTMEDOIS/Presentation/Public/index.php?action=login');
+    exit;
+}
+
+// Use supplier_id (which is the same as vendor_id in your system)
+$supplier_id = $_SESSION['vendor_id'] ?? null;
+
+if (!$supplier_id) {
+    die('Supplier ID not found. Please login again.');
+}
 
 $selected_month = $_GET["month"] ?? "";
 
