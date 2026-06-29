@@ -42,7 +42,7 @@ class InvoiceController {
         return $this->invoiceModel->generateNumber();
     }
 
-    // GET DO DETAILS (AJAX)
+    // GET DO DETAILS
     public function getDODetails() {
         session_start();
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Vendor') {
