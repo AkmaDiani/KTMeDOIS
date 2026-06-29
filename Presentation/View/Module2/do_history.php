@@ -20,10 +20,47 @@ if (!$supplier_id) {
     die('Supplier ID not found. Please login again.');
 }
 
-$selected_month = $_GET["month"] ?? "";
-
 $service = new DOService($pdo);
-$dos = $service->getDOHistory((int)$supplier_id, $selected_month);
+
+function filterByMonth($service, $supplier_id)
+{
+    $selected_month = $_GET["month"] ?? "";
+    return $service->getDOHistory((int)$supplier_id, $selected_month);
+}
+
+function displayHistory($dos)
+{
+    if (count($dos) > 0) {
+        foreach ($dos as $do) {
+            $statusClass = str_replace(" ", "", $do["Status"]);
+?>
+            <tr>
+                <td><?= htmlspecialchars($do["DO_number"]) ?></td>
+                <td><?= htmlspecialchars($do["PO_number"]) ?></td>
+                <td><?= htmlspecialchars($do["Supplier_name"]) ?></td>
+                <td>
+                    <span class="status <?= htmlspecialchars($statusClass) ?>">
+                        <?= htmlspecialchars($do["Status"]) ?>
+                    </span>
+                </td>
+                <td><?= date("d/m/Y h:i A", strtotime($do["created_date"])) ?></td>
+                <td>
+                    <a class="btn" href="view_do.php?id=<?= urlencode($do["DO_id"]) ?>">View</a>
+                </td>
+            </tr>
+        <?php
+        }
+    } else {
+        ?>
+        <tr>
+            <td colspan="6" style="text-align:center;">No delivery orders found.</td>
+        </tr>
+<?php
+    }
+}
+
+$selected_month = $_GET["month"] ?? "";
+$dos = filterByMonth($service, $supplier_id);
 ?>
 
 <!DOCTYPE html>
@@ -124,10 +161,8 @@ $dos = $service->getDOHistory((int)$supplier_id, $selected_month);
 </head>
 
 <body>
-    
-    <?php 
-    include __DIR__ . '/../SharedUI/topbar.php';
-    include __DIR__ . '/../SharedUI/sidebarM2.php'; ?>
+
+    <?php include("../includes/sidebar.php"); ?>
 
     <div class="content"></div>
 
@@ -155,29 +190,7 @@ $dos = $service->getDOHistory((int)$supplier_id, $selected_month);
                 <th>Action</th>
             </tr>
 
-            <?php if (count($dos) > 0): ?>
-                <?php foreach ($dos as $do): ?>
-                    <?php $statusClass = str_replace(" ", "", $do["Status"]); ?>
-                    <tr>
-                        <td><?= htmlspecialchars($do["DO_number"]) ?></td>
-                        <td><?= htmlspecialchars($do["PO_number"]) ?></td>
-                        <td><?= htmlspecialchars($do["Supplier_name"]) ?></td>
-                        <td>
-                            <span class="status <?= htmlspecialchars($statusClass) ?>">
-                                <?= htmlspecialchars($do["Status"]) ?>
-                            </span>
-                        </td>
-                        <td><?= date("d/m/Y h:i A", strtotime($do["created_date"])) ?></td>
-                        <td>
-                            <a class="btn" href="view_do.php?id=<?= urlencode($do["DO_id"]) ?>">View</a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="6" style="text-align:center;">No delivery orders found.</td>
-                </tr>
-            <?php endif; ?>
+            <?php displayHistory($dos); ?>
         </table>
     </div>
     </div>
