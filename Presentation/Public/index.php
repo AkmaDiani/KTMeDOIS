@@ -115,6 +115,11 @@ class FrontController {
                 $controller = new InvoiceController($this->db);
                 $controller->reviewAction();
                 break;
+
+            case 'manage_do':
+                $controller = new DOService($this->db);
+                $controller->getDOHistory();
+                break;
                 
             default:
                 header('Location: /KTMEDOIS/Presentation/Public/index.php?action=login');
