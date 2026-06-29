@@ -1,11 +1,23 @@
 <?php
-require_once __DIR__ . "/../../Application/Model/db.php";
-require_once __DIR__ . "/../../Application/Controllers/DOService.php";
+require_once __DIR__ . "/../../../Data/db.php";
+require_once __DIR__ . "/../../../Application/Controller/DOService.php";
 
 session_start();
 
+// Get database connection
+$pdo = Database::getInstance()->getConnection();
 
-$supplier_id = $_SESSION['supplier_id'];
+// Check if user is logged in and is a vendor
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Vendor') {
+    header('Location: /KTMEDOIS/Presentation/Public/index.php?action=login');
+    exit;
+}
+
+$supplier_id = $_SESSION['vendor_id'] ?? null;
+
+if (!$supplier_id) {
+    die('Supplier ID not found. Please login again.');
+}
 
 $service = new DOService($pdo);
 $supplier = $service->getSupplierById($supplier_id);
@@ -172,9 +184,9 @@ if (!$supplier) {
         <h1>Submit Delivery Order (DO)</h1>
         <p class="subtitle">Please complete the form below and upload supporting documents.</p>
 
-        <form action="../../Application/Middleware/api_DO.php" method="POST" enctype="multipart/form-data">
+        <form action="/KTMEDOIS/Application/Middleware/API_gateways/api_DO.php" method="POST" enctype="multipart/form-data">
 
-            <input type="hidden" name="staff_id" value="<?= htmlspecialchars($_SESSION['staff_id']) ?>">
+            <input type="hidden" name="staff_id" value="<?= htmlspecialchars($_SESSION['staff_id'] ?? '') ?>">
 
             <div class="card">
                 <div class="section-title">1. Upload Delivery Order Document</div>
