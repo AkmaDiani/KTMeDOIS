@@ -58,7 +58,7 @@ class DOService
         try {
             $po_number = trim($post["po_number"] ?? "");
 
-            $staff_id = (int)($post["staff_id"] ?? 0);
+            $staff_id = null;
 
 
             if ($supplier_id <= 0 || empty($po_number)) {
@@ -87,6 +87,11 @@ class DOService
             $proofFile = $this->validateFile($files["proof_file"]);
 
             if ($this->poModel->poNumberExists($po_number)) {
+
+                if ($this->doModel->poHasActiveSubmission($po_number)) {
+                    throw new Exception("This PO Number has already been submitted and is currently Under Review or Approved.");
+                }
+
                 $status = "Under Review";
                 $reason = "-";
             } else {
