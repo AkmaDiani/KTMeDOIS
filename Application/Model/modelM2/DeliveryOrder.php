@@ -8,6 +8,20 @@ class DeliveryOrder
         $this->pdo = $pdo;
     }
 
+    public function poHasActiveSubmission($po_number)
+    {
+        $stmt = $this->pdo->prepare("
+        SELECT COUNT(*)
+        FROM `do`
+        WHERE PO_number = ?
+        AND Status IN ('Under Review', 'Approved')
+    ");
+
+        $stmt->execute([$po_number]);
+
+        return $stmt->fetchColumn() > 0;
+    }
+
     public function getNextDOId()
     {
         $stmt = $this->pdo->query("
