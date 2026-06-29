@@ -118,29 +118,6 @@ if (!class_exists('InvoiceStatusTracking')) {
                         <div class="alert alert-success"><?= $this->escape($success) ?></div>
                     <?php endforeach; ?>
 
-                    <!-- Filters -->
-                    <div class="filter-container">
-                        <form method="get" action="/KTMEDOIS/Presentation/Public/index.php">
-                            <input type="hidden" name="action" value="invoice_pending">
-
-                            <select name="status">
-                                <option value="all">All Status</option>
-                                <option value="Submitted" <?= ($_GET['status'] ?? '') === 'Submitted' ? 'selected' : '' ?>>Submitted</option>
-                                <option value="Finance Review" <?= ($_GET['status'] ?? '') === 'Finance Review' ? 'selected' : '' ?>>Finance Review</option>
-                                <option value="Payment Processing" <?= ($_GET['status'] ?? '') === 'Payment Processing' ? 'selected' : '' ?>>Payment Processing</option>
-                                <option value="Paid" <?= ($_GET['status'] ?? '') === 'Paid' ? 'selected' : '' ?>>Paid</option>
-                                <option value="Rejected" <?= ($_GET['status'] ?? '') === 'Rejected' ? 'selected' : '' ?>>Rejected</option>
-                            </select>
-
-                            <input type="date" name="date_from" value="<?= $this->escape($_GET['date_from'] ?? '') ?>">
-                            <input type="date" name="date_to" value="<?= $this->escape($_GET['date_to'] ?? '') ?>">
-
-                            <input type="text" name="search" placeholder="Search Invoice/Supplier/DO" value="<?= $this->escape($_GET['search'] ?? '') ?>">
-
-                            <button type="submit" class="btn btn-primary">Apply Filters</button>
-                            <a href="/KTMEDOIS/Presentation/Public/index.php?action=invoice_pending" class="btn">Reset</a>
-                        </form>
-                    </div>
 
                     <!-- Invoice List -->
                     <?php if (empty($invoices)): ?>
