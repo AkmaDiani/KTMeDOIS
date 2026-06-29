@@ -176,7 +176,9 @@ if (!$supplier) {
 
 <body>
 
-    <?php include("../SharedUI/sidebarM2.php"); ?>
+    <?php 
+    include __DIR__ . '/../SharedUI/topbar.php';
+    include __DIR__ . '/../SharedUI/sidebarM2.php'; ?>
 
     <div class="content"></div>
 
