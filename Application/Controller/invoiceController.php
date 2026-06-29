@@ -1,13 +1,13 @@
 <?php
 // Application/Controller/invoiceController.php
 
-require_once __DIR__ . '/../Model/Invoice.php';
-require_once __DIR__ . '/../Model/Item.php';
-require_once __DIR__ . '/../Model/DeliveryOrder.php';
-require_once __DIR__ . '/../Model/Supplier.php';
-require_once __DIR__ . '/../Model/Staff.php';
-require_once __DIR__ . '/../Model/Notification.php';
-require_once __DIR__ . '/../Model/AuditLog.php';
+require_once __DIR__ . '/../Model/modelM3/Invoice.php';
+require_once __DIR__ . '/../Model/modelM3/Item.php';
+require_once __DIR__ . '/../Model/modelM3/DeliveryOrder.php';
+require_once __DIR__ . '/../Model/modelM3/Supplier.php';
+require_once __DIR__ . '/../Model/modelM3/Staff.php';
+require_once __DIR__ . '/../Model/modelM3/Notification.php';
+require_once __DIR__ . '/../Model/modelM3/AuditLog.php';
 
 // View classes
 require_once __DIR__ . '/../../Presentation/View/Module3/UploadInvoice.php';
@@ -37,16 +37,12 @@ class InvoiceController {
         $this->auditLogModel = new AuditLog();
     }
 
-    // ------------------------------------------------------------
     // GENERATE INVOICE NUMBER
-    // ------------------------------------------------------------
     private function generateInvoiceNumber() {
         return $this->invoiceModel->generateNumber();
     }
 
-    // ------------------------------------------------------------
     // GET DO DETAILS (AJAX)
-    // ------------------------------------------------------------
     public function getDODetails() {
         session_start();
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Vendor') {
@@ -83,9 +79,7 @@ class InvoiceController {
         exit;
     }
 
-    // ------------------------------------------------------------
     // VENDOR - SUBMIT FORM
-    // ------------------------------------------------------------
     public function submitForm() {
         session_start();
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Vendor') {
@@ -115,9 +109,7 @@ class InvoiceController {
         exit;
     }
 
-    // ------------------------------------------------------------
     // VENDOR - SUBMIT (WITH DRAFT SUPPORT)
-    // ------------------------------------------------------------
     public function submit() {
         session_start();
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Vendor') {
@@ -274,9 +266,7 @@ class InvoiceController {
         }
     }
 
-    // ------------------------------------------------------------
     // VENDOR - STATUS
-    // ------------------------------------------------------------
     public function status() {
         session_start();
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Vendor') {
@@ -299,9 +289,7 @@ class InvoiceController {
         exit;
     }
 
-    // ------------------------------------------------------------
     // OFFICER - ALL INVOICES
-    // ------------------------------------------------------------
     public function pendingList() {
         session_start();
         if (!in_array($_SESSION['role'], ['KTM Officer', 'Finance Officer'])) {
@@ -323,9 +311,7 @@ class InvoiceController {
         exit;
     }
 
-    // ------------------------------------------------------------
     // OFFICER - REVIEW ACTION
-    // ------------------------------------------------------------
     public function reviewAction() {
         session_start();
         if (!in_array($_SESSION['role'], ['KTM Officer', 'Finance Officer'])) {
@@ -386,9 +372,7 @@ class InvoiceController {
         exit;
     }
 
-    // ------------------------------------------------------------
     // INVOICE SUMMARY (Vendor & Officer)
-    // ------------------------------------------------------------
     public function invoiceSummary() {
         session_start();
         if (!isset($_SESSION['user_id'])) {
