@@ -6,7 +6,6 @@ require_once __DIR__ . '/../../Data/db.php';
 class AuthController {
     private $db;
 
-    // ✅ ADD CONSTRUCTOR WITH $db PARAMETER
     public function __construct($db) {
         $this->db = $db;
     }
