@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . "/../../business/Model/db.php";
-require_once __DIR__ . "/../../business/Controllers/DOService.php";
+require_once __DIR__ . "/../../../Data/db.php";
+require_once __DIR__ . "/../../../Application/Controller/DOService.php";
 
 session_start();
 
@@ -110,8 +110,10 @@ $dos = $service->getDOHistory((int)$supplier_id, $selected_month);
 </head>
 
 <body>
-
-    <?php include("../includes/sidebar.php"); ?>
+    
+    <?php 
+    include __DIR__ . '/../SharedUI/topbar.php';
+    include __DIR__ . '/../SharedUI/sidebarM2.php'; ?>
 
     <div class="content"></div>
 
