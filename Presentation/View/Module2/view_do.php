@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . "/../../business/Model/db.php";
-require_once __DIR__ . "/../../business/Controllers/DOService.php";
+require_once __DIR__ . "/../../Application/Model/db.php";
+require_once __DIR__ . "/../../Application/Controllers/DOService.php";
 
 session_start();
 
@@ -75,7 +75,7 @@ $items = $result["items"];
 
 <body>
 
-    <?php include("../includes/sidebar.php"); ?>
+    <?php include("../SharedUI/sidebarM2.php"); ?>
 
     <div class="content"></div>
 
@@ -90,11 +90,11 @@ $items = $result["items"];
 
         <h3>Submitted Files</h3>
 
-        <a class="btn" target="_blank" href="../../business/Controllers/view_file.php?id=<?= urlencode($do_id) ?>&type=do">
+        <a class="btn" target="_blank" href="../../Application/Controllers/view_file.php?id=<?= urlencode($do_id) ?>&type=do">
             View DO File
         </a>
 
-        <a class="btn" target="_blank" href="../../business/Controllers/view_file.php?id=<?= urlencode($do_id) ?>&type=proof">
+        <a class="btn" target="_blank" href="../../Application/Controllers/view_file.php?id=<?= urlencode($do_id) ?>&type=proof">
             View Proof File
         </a>
 
