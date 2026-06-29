@@ -1,7 +1,7 @@
 <?php
 // Application/Model/AuditLog.php
 
-require_once __DIR__ . '/../../Data/db.php';
+require_once __DIR__ . '/../../../Data/db.php';
 
 class AuditLog {
     private $db;
