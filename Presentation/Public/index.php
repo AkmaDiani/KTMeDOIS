@@ -119,6 +119,7 @@ class FrontController {
             default:
                 header('Location: /KTMEDOIS/Presentation/Public/index.php?action=login');
                 exit;
+                
         }
     }
 }
