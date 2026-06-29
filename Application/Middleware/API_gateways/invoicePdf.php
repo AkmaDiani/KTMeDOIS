@@ -1,7 +1,7 @@
 <?php
 // Application/Middleware/API_gateways/invoicePdf.php
 
-require_once __DIR__ . '/../../Model/Invoice.php';
+require_once __DIR__ . '/../../Model/modelM3/Invoice.php';
 require_once __DIR__ . '/vendor/autoload.php';
 
 class InvoicePdf {
