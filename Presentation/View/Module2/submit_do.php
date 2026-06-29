@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . "/../../business/Model/db.php";
-require_once __DIR__ . "/../../business/Controllers/DOService.php";
+require_once __DIR__ . "/../../Application/Model/db.php";
+require_once __DIR__ . "/../../Application/Controllers/DOService.php";
 
 session_start();
 
@@ -164,7 +164,7 @@ if (!$supplier) {
 
 <body>
 
-    <?php include("../includes/sidebar.php"); ?>
+    <?php include("../SharedUI/sidebarM2.php"); ?>
 
     <div class="content"></div>
 
@@ -172,7 +172,7 @@ if (!$supplier) {
         <h1>Submit Delivery Order (DO)</h1>
         <p class="subtitle">Please complete the form below and upload supporting documents.</p>
 
-        <form action="../../business/Middleware/api_DO.php" method="POST" enctype="multipart/form-data">
+        <form action="../../Application/Middleware/api_DO.php" method="POST" enctype="multipart/form-data">
 
             <input type="hidden" name="staff_id" value="<?= htmlspecialchars($_SESSION['staff_id']) ?>">
 
