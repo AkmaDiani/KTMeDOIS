@@ -1,7 +1,7 @@
 <?php
 // Application/Model/Notification.php
 
-require_once __DIR__ . '/../../Data/db.php';
+require_once __DIR__ . '/../../../Data/db.php';
 
 class Notification {
     private $db;
