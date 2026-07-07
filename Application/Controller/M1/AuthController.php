@@ -1,13 +1,12 @@
 <?php
-// ============================================
+//M1
 // AUTH CONTROLLER - Staff + Supplier Login
-// ============================================
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/../Helpers/functions.php';
+require_once __DIR__ . '/../../Helpers/functions.php';
 
 class AuthController
 {
@@ -24,13 +23,13 @@ class AuthController
     {
         // If already logged in as staff
         if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'staff') {
-            header('Location: /SDW/KTMeDOIS/staff/dashboard');
+            header('Location: /KTMeDOIS/Presentation/View/Staff/dashboard');
             exit();
         }
 
         // If already logged in as supplier
         if (isset($_SESSION['supplier_id']) && $_SESSION['user_type'] === 'supplier') {
-            header('Location: /SDW/KTMeDOIS/supplier/dashboard');
+            header('Location: /KTMeDOIS/Presentation/View/Module1/dashboard');
             exit();
         }
 
@@ -42,9 +41,7 @@ class AuthController
             $login_type = mysqli_real_escape_string($this->conn, $_POST['login_type']);
 
             if ($login_type == 'staff') {
-                // ============================================
                 // STAFF LOGIN
-                // ============================================
                 $role = mysqli_real_escape_string($this->conn, $_POST['role']);
 
                 $query = "SELECT * FROM `ktm staff` WHERE Username = '$username' AND Status = 'Active'";
@@ -63,7 +60,7 @@ class AuthController
                             $updateQuery = "UPDATE `ktm staff` SET Last_Login = NOW() WHERE User_ID = " . $user['User_ID'];
                             mysqli_query($this->conn, $updateQuery);
 
-                            header('Location: /SDW/KTMeDOIS/staff/dashboard');
+                            header('Location: /KTMeDOIS/Presentation/View/Staff/dashboard');
                             exit();
                         } else {
                             $error = 'Invalid role selected. Please choose the correct role.';
@@ -75,9 +72,7 @@ class AuthController
                     $error = 'Invalid username. Please check your credentials.';
                 }
             } elseif ($login_type == 'supplier') {
-                // ============================================
                 // SUPPLIER LOGIN - MODULE 1
-                // ============================================
                 $query = "SELECT * FROM supplier WHERE (username = '$username' OR SUPPLIER_EMAIL_ADD = '$username') AND SUPPLIER_CTC_STATUS = 'Active'";
                 $result = mysqli_query($this->conn_supplier, $query);
 
@@ -97,7 +92,7 @@ class AuthController
                         $updateQuery = "UPDATE supplier SET last_login = NOW() WHERE SUPPLIERID = '{$supplier['SUPPLIERID']}'";
                         mysqli_query($this->conn_supplier, $updateQuery);
 
-                        header('Location: /SDW/KTMeDOIS/supplier/dashboard');
+                        header('Location: /KTMeDOIS/Presentation/View/Module1/dashboard');
                         exit();
                     } else {
                         $error = 'Invalid password. Please try again.';
@@ -111,7 +106,7 @@ class AuthController
         $title = 'Login - KTM eDOIS';
         $showTopbar = false;
         $showSidebar = false;
-        include __DIR__ . '/../../Presentation/View/auth/login.php';
+        include __DIR__ . '/../../../Presentation/View/auth/login.php';
     }
 
     public function logout()
@@ -132,7 +127,7 @@ class AuthController
         }
 
         session_destroy();
-        header('Location: /SDW/KTMeDOIS/login');
+        header('Location: /KTMeDOIS/login');
         exit();
     }
 }
