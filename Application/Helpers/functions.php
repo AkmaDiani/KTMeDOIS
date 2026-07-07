@@ -1,6 +1,6 @@
 <?php
 // ============================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS - PDO VERSION
 // ============================================
 
 function getStatusBadge($status)
@@ -27,49 +27,88 @@ function formatDate($date)
     return date('d/m/Y H:i', strtotime($date));
 }
 
+// ------------------------------------------------------------
+// SUPPLIER FUNCTIONS - PDO VERSION (Uses $GLOBALS)
+// ------------------------------------------------------------
+
 function getSupplierFromExternal($supplier_id)
 {
-    global $conn_supplier;
-    $supplier_id = mysqli_real_escape_string($conn_supplier, $supplier_id);
-    $query = "SELECT * FROM supplier WHERE SUPPLIERID = '$supplier_id'";
-    $result = mysqli_query($conn_supplier, $query);
-    return mysqli_fetch_assoc($result);
+    $supplierPdo = $GLOBALS['supplier_pdo'] ?? null;
+    if (!$supplierPdo) return null;
+    
+    try {
+        $stmt = $supplierPdo->prepare("SELECT * FROM supplier WHERE SUPPLIERID = ?");
+        $stmt->execute([$supplier_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return null;
+    }
 }
 
 function syncSupplierToMain($supplier_id)
 {
-    global $conn_main, $conn_supplier;
+    $mainPdo = $GLOBALS['main_pdo'] ?? null;
+    $supplierPdo = $GLOBALS['supplier_pdo'] ?? null;
+    
+    if (!$mainPdo || !$supplierPdo) return false;
+    
+    try {
+        $stmt = $supplierPdo->prepare("SELECT * FROM supplier WHERE SUPPLIERID = ?");
+        $stmt->execute([$supplier_id]);
+        $external = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$external) return false;
+        
+        $stmt = $mainPdo->prepare("SELECT Supplier_id FROM supplier WHERE Vendor_Number = ?");
+        $stmt->execute([$external['SUPPLIERID']]);
+        $exists = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($exists) {
+            $sql = "UPDATE supplier SET 
+                        Supplier_name = ?, Contac_person = ?, phone = ?, email = ?,
+                        status = ?, username = ?, password = ?
+                    WHERE Supplier_id = ?";
+            $stmt = $mainPdo->prepare($sql);
+            return $stmt->execute([
+                $external['SUPPLIER_COMP_NAME'],
+                $external['SUPPLIER_CTC_PERSON'],
+                $external['SUPPLIER_CTC_NO'],
+                $external['SUPPLIER_EMAIL_ADD'],
+                $external['SUPPLIER_CTC_STATUS'],
+                $external['username'] ?? null,
+                $external['password'] ?? null,
+                $exists['Supplier_id']
+            ]);
+        } else {
+            $sql = "INSERT INTO supplier 
+                        (Supplier_name, Contac_person, phone, email, status, Vendor_Number, username, password) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $mainPdo->prepare($sql);
+            return $stmt->execute([
+                $external['SUPPLIER_COMP_NAME'],
+                $external['SUPPLIER_CTC_PERSON'],
+                $external['SUPPLIER_CTC_NO'],
+                $external['SUPPLIER_EMAIL_ADD'],
+                $external['SUPPLIER_CTC_STATUS'],
+                $external['SUPPLIERID'],
+                $external['username'] ?? null,
+                $external['password'] ?? null
+            ]);
+        }
+    } catch (PDOException $e) {
+        return false;
+    }
+}
 
-    $external = getSupplierFromExternal($supplier_id);
-    if (!$external) return false;
-
-    $checkQuery = "SELECT Supplier_id FROM supplier WHERE Vendor_Number = '" . mysqli_real_escape_string($conn_main, $external['SUPPLIERID']) . "'";
-    $checkResult = mysqli_query($conn_main, $checkQuery);
-
-    if (mysqli_num_rows($checkResult) > 0) {
-        $row = mysqli_fetch_assoc($checkResult);
-        $updateQuery = "UPDATE supplier SET 
-                         Supplier_name = '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_COMP_NAME']) . "',
-                         Contac_person = '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_CTC_PERSON']) . "',
-                         phone = '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_CTC_NO']) . "',
-                         email = '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_EMAIL_ADD']) . "',
-                         status = '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_CTC_STATUS']) . "',
-                         username = '" . mysqli_real_escape_string($conn_main, $external['username']) . "',
-                         password = '" . mysqli_real_escape_string($conn_main, $external['password']) . "'
-                         WHERE Supplier_id = " . $row['Supplier_id'];
-        return mysqli_query($conn_main, $updateQuery);
-    } else {
-        $insertQuery = "INSERT INTO supplier (Supplier_name, Contac_person, phone, email, status, Vendor_Number, username, password) 
-                        VALUES (
-                            '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_COMP_NAME']) . "',
-                            '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_CTC_PERSON']) . "',
-                            '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_CTC_NO']) . "',
-                            '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_EMAIL_ADD']) . "',
-                            '" . mysqli_real_escape_string($conn_main, $external['SUPPLIER_CTC_STATUS']) . "',
-                            '" . mysqli_real_escape_string($conn_main, $external['SUPPLIERID']) . "',
-                            '" . mysqli_real_escape_string($conn_main, $external['username']) . "',
-                            '" . mysqli_real_escape_string($conn_main, $external['password']) . "'
-                        )";
-        return mysqli_query($conn_main, $insertQuery);
+function getSupplierFromMain($supplier_id)
+{
+    $mainPdo = $GLOBALS['main_pdo'] ?? null;
+    if (!$mainPdo) return null;
+    
+    try {
+        $stmt = $mainPdo->prepare("SELECT * FROM supplier WHERE Supplier_id = ?");
+        $stmt->execute([$supplier_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return null;
     }
 }
