@@ -2,7 +2,6 @@
 $title = 'Login - KTM eDOIS';
 $showTopbar = false;
 $showSidebar = false;
-include __DIR__ . '/../SharedUI/topbar.php';
 ?>
 
 <div class="login-page">
