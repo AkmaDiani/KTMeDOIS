@@ -16,25 +16,23 @@ class AuthController
     {
         // Already logged in checks...
         if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'staff') {
-            header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=dashboard');
+            header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=dashboard');
             exit;
         }
         if (isset($_SESSION['supplier_id']) && $_SESSION['user_type'] === 'supplier') {
-            header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=supplier&action=dashboard');
+            header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=supplier&action=dashboard');
             exit;
         }
 
         $error = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // ✅ FIX: Accept BOTH 'email' AND 'username' (for cache compatibility)
             $login_input = trim($_POST['email'] ?? $_POST['username'] ?? '');
             $password = trim($_POST['password'] ?? '');
             $login_type = $_POST['login_type'] ?? '';
 
             if ($login_type === 'staff') {
                 $role = $_POST['role'] ?? '';
-
                 $stmt = $this->pdo->prepare("SELECT * FROM `ktm staff` WHERE Email = ? AND Status = 'Active'");
                 $stmt->execute([$login_input]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -49,7 +47,7 @@ class AuthController
                         $update = $this->pdo->prepare("UPDATE `ktm staff` SET Last_Login = NOW() WHERE User_ID = ?");
                         $update->execute([$user['User_ID']]);
 
-                        header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=dashboard');
+                        header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=dashboard');
                         exit;
                     } else {
                         $error = 'Invalid role selected.';
@@ -59,11 +57,13 @@ class AuthController
                 }
 
             } elseif ($login_type === 'supplier') {
-                $stmt = $this->supplierPdo->prepare("SELECT * FROM supplier WHERE (username = ? OR SUPPLIER_EMAIL_ADD = ?) AND SUPPLIER_CTC_STATUS = 'Active'");
+                // ✅ FIX: Use correct column names – no 'username'
+                $stmt = $this->supplierPdo->prepare("SELECT * FROM supplier WHERE (SUPPLIERID = ? OR SUPPLIER_EMAIL_ADD = ?) AND SUPPLIER_CTC_STATUS = 'Active'");
                 $stmt->execute([$login_input, $login_input]);
                 $supplier = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($supplier && md5($password) === ($supplier['password'] ?? '')) {
+                // ✅ Password is stored as plain text – no md5()
+                if ($supplier && $password === ($supplier['password'] ?? '')) {
                     syncSupplierToMain($supplier['SUPPLIERID']);
 
                     $_SESSION['supplier_id'] = $supplier['SUPPLIERID'];
@@ -72,10 +72,11 @@ class AuthController
                     $_SESSION['user_type'] = 'supplier';
                     $_SESSION['role'] = 'Supplier';
 
-                    $update = $this->supplierPdo->prepare("UPDATE supplier SET last_login = NOW() WHERE SUPPLIERID = ?");
-                    $update->execute([$supplier['SUPPLIERID']]);
+                    // ✅ last_login column does not exist – skip update
+                    // $update = $this->supplierPdo->prepare("UPDATE supplier SET last_login = NOW() WHERE SUPPLIERID = ?");
+                    // $update->execute([$supplier['SUPPLIERID']]);
 
-                    header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=supplier&action=dashboard');
+                    header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=supplier&action=dashboard');
                     exit;
                 } else {
                     $error = 'Invalid supplier credentials.';
@@ -100,7 +101,7 @@ class AuthController
             );
         }
         session_destroy();
-        header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=auth&action=login');
+        header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=auth&action=login');
         exit;
     }
 
@@ -109,9 +110,9 @@ class AuthController
         if (isset($_SESSION['user_id'])) {
             $role = $_SESSION['role'] ?? '';
             if ($role === 'Vendor' || $role === 'Supplier') {
-                header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=invoice_status');
+                header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=invoice_status');
             } else {
-                header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=invoice_pending');
+                header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=invoice_pending');
             }
             exit;
         }
