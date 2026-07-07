@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . "/../../../Data/db.php";
-require_once __DIR__ . "/../../../Application/Controller/DOService.php";
+require_once __DIR__ . '/../../bootstrap.php';
 
 session_start();
 
