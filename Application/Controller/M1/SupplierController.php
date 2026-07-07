@@ -1,82 +1,89 @@
 <?php
-// ============================================
-// MODULE 1 - SUPPLIER CONTROLLER
-// ============================================
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require_once __DIR__ . '/../Helpers/functions.php';
-require_once __DIR__ . '/../Middleware/API_gateways/SupplierAPI.php';
-require_once __DIR__ . '/../Models/SupplierModel.php';
-require_once __DIR__ . '/../Models/PaymentModel.php';
+// Application/Controller/M1/SupplierController.php
 
 class SupplierController
 {
-    private $conn;
-    private $conn_supplier;
-    private $api;
+    private $pdo;
+    private $supplierPdo;
     private $supplierModel;
     private $paymentModel;
 
-    public function __construct($conn, $conn_supplier)
+    public function __construct(PDO $pdo, PDO $supplierPdo = null)
     {
-        $this->conn = $conn;
-        $this->conn_supplier = $conn_supplier;
-        $this->api = new SupplierAPI($conn, $conn_supplier);
-        $this->supplierModel = new SupplierModel($conn);
-        $this->paymentModel = new PaymentModel($conn);
+        $this->pdo = $pdo;
+        $this->supplierPdo = $supplierPdo ?? $pdo;
+        $this->supplierModel = new SupplierModel($pdo);
+        $this->paymentModel = new PaymentModel($pdo);
+    }
+
+    private function checkAuth()
+    {
+        if (!isset($_SESSION['supplier_id'])) {
+            header('Location: ' . ROOT_PATH . '/login');
+            exit;
+        }
     }
 
     public function dashboard()
     {
-        if (!isset($_SESSION['supplier_id'])) {
-            header('Location: /SDW/KTMeDOIS/login');
-            exit();
-        }
+        $this->checkAuth();
 
         $supplier_id = $_SESSION['supplier_id'];
         $supplier = getSupplierFromExternal($supplier_id);
 
-        $totalDO = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM do WHERE supplier_ID = '$supplier_id'"))['count'] ?? 0;
-        $pendingDO = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM do WHERE supplier_ID = '$supplier_id' AND Status = 'Submitted'"))['count'] ?? 0;
-        $approvedDO = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM do WHERE supplier_ID = '$supplier_id' AND Status = 'Approved'"))['count'] ?? 0;
-        $rejectedDO = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM do WHERE supplier_ID = '$supplier_id' AND Status = 'Rejected'"))['count'] ?? 0;
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM do WHERE supplier_ID = ?");
+        $stmt->execute([$supplier_id]);
+        $totalDO = $stmt->fetchColumn();
 
-        $totalPaid = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT SUM(Payment_Amount) as total FROM payment WHERE Supplier_ID = '$supplier_id' AND Payment_Status = 'Paid'"))['total'] ?? 0;
-        $totalPending = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT SUM(Payment_Amount) as total FROM payment WHERE Supplier_ID = '$supplier_id' AND Payment_Status = 'Pending'"))['total'] ?? 0;
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM do WHERE supplier_ID = ? AND Status = 'Submitted'");
+        $stmt->execute([$supplier_id]);
+        $pendingDO = $stmt->fetchColumn();
 
-        $recentDO = mysqli_query($this->conn, "SELECT * FROM do WHERE supplier_ID = '$supplier_id' ORDER BY created_date DESC LIMIT 5");
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM do WHERE supplier_ID = ? AND Status = 'Approved'");
+        $stmt->execute([$supplier_id]);
+        $approvedDO = $stmt->fetchColumn();
+
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM do WHERE supplier_ID = ? AND Status = 'Rejected'");
+        $stmt->execute([$supplier_id]);
+        $rejectedDO = $stmt->fetchColumn();
+
+        $stmt = $this->pdo->prepare("SELECT SUM(Payment_Amount) as total FROM payment WHERE Supplier_ID = ? AND Payment_Status = 'Paid'");
+        $stmt->execute([$supplier_id]);
+        $totalPaid = $stmt->fetchColumn() ?: 0;
+
+        $stmt = $this->pdo->prepare("SELECT SUM(Payment_Amount) as total FROM payment WHERE Supplier_ID = ? AND Payment_Status = 'Pending'");
+        $stmt->execute([$supplier_id]);
+        $totalPending = $stmt->fetchColumn() ?: 0;
+
+        $stmt = $this->pdo->prepare("SELECT * FROM do WHERE supplier_ID = ? ORDER BY created_date DESC LIMIT 5");
+        $stmt->execute([$supplier_id]);
+        $recentDO = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $title = 'Supplier Dashboard - KTM eDOIS';
         $showTopbar = true;
         $showSidebar = true;
-        include __DIR__ . '/../../Presentation/View/Module1/dashboard.php';
+        include ROOT_PATH . '/Presentation/View/Module1/dashboard.php';
     }
 
     public function profile()
     {
-        if (!isset($_SESSION['supplier_id'])) {
-            header('Location: /SDW/KTMeDOIS/login');
-            exit();
-        }
+        $this->checkAuth();
 
         $supplier = getSupplierFromExternal($_SESSION['supplier_id']);
-        $totalDO = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM do WHERE supplier_ID = '" . $_SESSION['supplier_id'] . "'"))['count'] ?? 0;
+
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM do WHERE supplier_ID = ?");
+        $stmt->execute([$_SESSION['supplier_id']]);
+        $totalDO = $stmt->fetchColumn();
 
         $title = 'Supplier Profile - KTM eDOIS';
         $showTopbar = true;
         $showSidebar = true;
-        include __DIR__ . '/../../Presentation/View/Module1/profile.php';
+        include ROOT_PATH . '/Presentation/View/Module1/profile.php';
     }
 
     public function doList()
     {
-        if (!isset($_SESSION['supplier_id'])) {
-            header('Location: /SDW/KTMeDOIS/login');
-            exit();
-        }
+        $this->checkAuth();
 
         $supplier_id = $_SESSION['supplier_id'];
         $doList = $this->supplierModel->getDOBySupplier($supplier_id);
@@ -84,15 +91,12 @@ class SupplierController
         $title = 'My Delivery Orders - KTM eDOIS';
         $showTopbar = true;
         $showSidebar = true;
-        include __DIR__ . '/../../Presentation/View/Module1/do.php';
+        include ROOT_PATH . '/Presentation/View/Module1/do.php';
     }
 
     public function payment()
     {
-        if (!isset($_SESSION['supplier_id'])) {
-            header('Location: /SDW/KTMeDOIS/login');
-            exit();
-        }
+        $this->checkAuth();
 
         $supplier_id = $_SESSION['supplier_id'];
         $payments = $this->paymentModel->getBySupplier($supplier_id);
@@ -101,30 +105,6 @@ class SupplierController
         $title = 'Payment Status - KTM eDOIS';
         $showTopbar = true;
         $showSidebar = true;
-        include __DIR__ . '/../../Presentation/View/Module1/payment.php';
-    }
-
-    // ============================================
-    // API METHODS
-    // ============================================
-
-    public function apiGetSupplier()
-    {
-        $this->api->getSupplier();
-    }
-
-    public function apiGetDO()
-    {
-        $this->api->getDO();
-    }
-
-    public function apiGetPayment()
-    {
-        $this->api->getPayment();
-    }
-
-    public function apiSyncSupplier()
-    {
-        $this->api->syncSupplier();
+        include ROOT_PATH . '/Presentation/View/Module1/payment.php';
     }
 }
