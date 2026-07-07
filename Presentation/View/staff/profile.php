@@ -2,9 +2,11 @@
 $title = 'Staff Profile - KTM eDOIS';
 $showTopbar = true;
 $showSidebar = true;
-include __DIR__ . '/../SharedUI/topbar.php';
-?>
+include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
+include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
 
+?>
+<div class="content">
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Staff Profile</h1>
 </div>
@@ -47,17 +49,8 @@ include __DIR__ . '/../SharedUI/topbar.php';
                 <div><strong>Member Since:</strong> <?php echo date('d/m/Y'); ?></div>
             </div>
         </div>
-
-        <div class="card card-ktm mt-3">
-            <div class="card-header bg-success text-white"><i class="fas fa-sync"></i> Quick Actions</div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="/SDW/KTMeDOIS/staff/dashboard" class="btn btn-primary"><i class="fas fa-home"></i> Dashboard</a>
-                    <a href="/SDW/KTMeDOIS/logout" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
-                </div>
-            </div>
-        </div>
     </div>
+</div>
 </div>
 
 <?php include __DIR__ . '/../SharedUI/footer.php'; ?>
