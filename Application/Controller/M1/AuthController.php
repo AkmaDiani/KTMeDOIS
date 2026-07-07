@@ -109,9 +109,9 @@ class AuthController
         if (isset($_SESSION['user_id'])) {
             $role = $_SESSION['role'] ?? '';
             if ($role === 'Vendor' || $role === 'Supplier') {
-                header('Location: /KTMedOIS/Presentation/Public/index.php?action=invoice_status');
+                header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=invoice_status');
             } else {
-                header('Location: /KTMedOIS/Presentation/Public/index.php?action=invoice_pending');
+                header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=invoice_pending');
             }
             exit;
         }
