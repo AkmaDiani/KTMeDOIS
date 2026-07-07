@@ -2,12 +2,13 @@
 $title = 'Edit Vendor - KTM eDOIS';
 $showTopbar = true;
 $showSidebar = true;
-include __DIR__ . '/../SharedUI/topbar.php';
-?>
+include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
+include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
 
+?>
+<div class="content">
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Edit Vendor</h1>
-    <a href="/SDW/KTMeDOIS/staff/vendor" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
 </div>
 
 <?php if (isset($success) && $success): ?>
@@ -26,7 +27,7 @@ include __DIR__ . '/../SharedUI/topbar.php';
                     <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($vendor['Supplier_name']); ?>" required>
                 </div>
                 <div class="col-md-6 mb-3"><label class="form-label fw-bold">Contact Person <span class="text-danger">*</span></label>
-                    <input type="text" name="contact" class="form-control" value="<?php echo htmlspecialchars($vendor['Contac_person']); ?>" required>
+                    <input type="text" name="contact" class="form-control" value="<?php echo htmlspecialchars($vendor['Contact_person']); ?>" required>
                 </div>
                 <div class="col-md-6 mb-3"><label class="form-label fw-bold">Phone Number <span class="text-danger">*</span></label>
                     <input type="text" name="phone" class="form-control" value="<?php echo htmlspecialchars($vendor['phone']); ?>" required>
@@ -46,11 +47,12 @@ include __DIR__ . '/../SharedUI/topbar.php';
                 </div>
             </div>
             <div class="text-end">
-                <a href="/SDW/KTMeDOIS/staff/vendor" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                <a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=vendor" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
                 <button type="submit" class="btn btn-warning"><i class="fas fa-save"></i> Update Vendor</button>
             </div>
         </form>
     </div>
+</div>
 </div>
 
 <?php include __DIR__ . '/../SharedUI/footer.php'; ?>
