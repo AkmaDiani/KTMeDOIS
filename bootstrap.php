@@ -22,15 +22,12 @@ spl_autoload_register(function ($class) {
         ROOT_PATH . '/Application/Controller/M2/',
         ROOT_PATH . '/Application/Controller/M3/',
         ROOT_PATH . '/Application/Controller/M4/',
-        
-        // Models that live directly in /Model/ (if any)
-        ROOT_PATH . '/Application/Model/',
-        
+      
         // Middleware & API gateways
         ROOT_PATH . '/Application/Middleware/',
         ROOT_PATH . '/Application/Middleware/API_gateways/',
         
-        // Helpers (in case you have class‑based helpers)
+        // Helpers
         ROOT_PATH . '/Application/Helpers/',
     ];
 
@@ -51,9 +48,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// ------------------------------------------------------------
 // Load shared helpers (functions, not classes)
-// ------------------------------------------------------------
 require_once ROOT_PATH . '/Application/Helpers/helpers.php';
 
 // Load database connection (provides Database class)
