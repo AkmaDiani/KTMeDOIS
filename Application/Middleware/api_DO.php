@@ -1,26 +1,25 @@
 <?php
-require_once __DIR__ . "/../Model/db.php";
-require_once __DIR__ . "/../Controllers/DOService.php";
+require_once ROOT_PATH . '/bootstrap.php';
 
-session_start();
+if (!isset($_SESSION['supplier_id']) || $_SESSION['user_type'] !== 'supplier') {
+    header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=auth&action=login');
+    exit;
+}
+
+$supplier_id = (int)$_SESSION['supplier_id'];
+
+$pdo = Database::getInstance()->getConnection();
 
 try {
-    /*
-     * TEMPORARY TESTING:
-     * Later after login, make sure login sets:
-     * $_SESSION["supplier_id"] = supplier Supplier_id;
-     */
-    $supplier_id = $_SESSION['supplier_id'];
-
     $service = new DOService($pdo);
-    $do_id = $service->submitDO($_POST, $_FILES, (int)$supplier_id);
+    $do_id = $service->submitDO($_POST, $_FILES, $supplier_id);
 
-    header("Location: ../../Presentation/Module2/view_do.php?id=" . urlencode((string)$do_id));
+    header('Location: /KTMeDOIS/Presentation/View/Module2/view_do.php?id=' . urlencode((string)$do_id));
     exit;
 } catch (Exception $e) {
-    echo "<script>
-            alert('Error: " . addslashes($e->getMessage()) . "');
+    echo '<script>
+            alert("Error: ' . addslashes($e->getMessage()) . '");
             window.history.back();
-          </script>";
+          </script>';
     exit;
 }
