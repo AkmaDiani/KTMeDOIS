@@ -14,27 +14,29 @@ class AuthController
 
     public function login()
     {
+        // Already logged in checks...
         if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'staff') {
-            header('Location: ' . ROOT_PATH . '/Presentation/View/Staff/dashboard');
+            header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=dashboard');
             exit;
         }
         if (isset($_SESSION['supplier_id']) && $_SESSION['user_type'] === 'supplier') {
-            header('Location: ' . ROOT_PATH . '/Presentation/View/Module1/dashboard');
+            header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=supplier&action=dashboard');
             exit;
         }
 
         $error = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $username = trim($_POST['username'] ?? '');
+            // ✅ FIX: Accept BOTH 'email' AND 'username' (for cache compatibility)
+            $login_input = trim($_POST['email'] ?? $_POST['username'] ?? '');
             $password = trim($_POST['password'] ?? '');
             $login_type = $_POST['login_type'] ?? '';
 
             if ($login_type === 'staff') {
                 $role = $_POST['role'] ?? '';
 
-                $stmt = $this->pdo->prepare("SELECT * FROM `ktm staff` WHERE Username = ? AND Status = 'Active'");
-                $stmt->execute([$username]);
+                $stmt = $this->pdo->prepare("SELECT * FROM `ktm staff` WHERE Email = ? AND Status = 'Active'");
+                $stmt->execute([$login_input]);
                 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($user && $password === $user['Password_Hash']) {
@@ -47,17 +49,18 @@ class AuthController
                         $update = $this->pdo->prepare("UPDATE `ktm staff` SET Last_Login = NOW() WHERE User_ID = ?");
                         $update->execute([$user['User_ID']]);
 
-                        header('Location: ' . ROOT_PATH . '/Presentation/View/Staff/dashboard');
+                        header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=dashboard');
                         exit;
                     } else {
                         $error = 'Invalid role selected.';
                     }
                 } else {
-                    $error = 'Invalid username or password.';
+                    $error = 'Invalid email or password.';
                 }
+
             } elseif ($login_type === 'supplier') {
                 $stmt = $this->supplierPdo->prepare("SELECT * FROM supplier WHERE (username = ? OR SUPPLIER_EMAIL_ADD = ?) AND SUPPLIER_CTC_STATUS = 'Active'");
-                $stmt->execute([$username, $username]);
+                $stmt->execute([$login_input, $login_input]);
                 $supplier = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($supplier && md5($password) === ($supplier['password'] ?? '')) {
@@ -72,7 +75,7 @@ class AuthController
                     $update = $this->supplierPdo->prepare("UPDATE supplier SET last_login = NOW() WHERE SUPPLIERID = ?");
                     $update->execute([$supplier['SUPPLIERID']]);
 
-                    header('Location: ' . ROOT_PATH . '/Presentation/View/Module1/dashboard');
+                    header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=supplier&action=dashboard');
                     exit;
                 } else {
                     $error = 'Invalid supplier credentials.';
@@ -97,7 +100,7 @@ class AuthController
             );
         }
         session_destroy();
-        header('Location: ' . ROOT_PATH . '/login');
+        header('Location: /KTMedOIS/Presentation/Public/indexM1.php?controller=auth&action=login');
         exit;
     }
 
@@ -106,9 +109,9 @@ class AuthController
         if (isset($_SESSION['user_id'])) {
             $role = $_SESSION['role'] ?? '';
             if ($role === 'Vendor' || $role === 'Supplier') {
-                header('Location: ' . ROOT_PATH . '/Presentation/Public/index.php?action=invoice_status');
+                header('Location: /KTMedOIS/Presentation/Public/index.php?action=invoice_status');
             } else {
-                header('Location: ' . ROOT_PATH . '/Presentation/Public/index.php?action=invoice_pending');
+                header('Location: /KTMedOIS/Presentation/Public/index.php?action=invoice_pending');
             }
             exit;
         }
