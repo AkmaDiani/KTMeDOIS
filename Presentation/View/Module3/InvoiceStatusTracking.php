@@ -47,11 +47,8 @@ if (!class_exists('InvoiceStatusTracking')) {
             <div class="content-area">
 
                 <?php if ($isVendorView): ?>
-                    <!-- ============================================== -->
-                    <!-- VENDOR VIEW                                    -->
-                    <!-- ============================================== -->
+                    <!-- VENDOR VIEW  -->
                     <h2>My Invoice Claims</h2>
-
                     <?php foreach ($errors as $error): ?>
                         <div class="alert alert-danger"><?= $this->escape($error) ?></div>
                     <?php endforeach; ?>
@@ -106,9 +103,7 @@ if (!class_exists('InvoiceStatusTracking')) {
                     <?php endif; ?>
 
                 <?php else: ?>
-                    <!-- ============================================== -->
-                    <!-- OFFICER VIEW - WITH AGING REPORT               -->
-                    <!-- ============================================== -->
+                    <!-- OFFICER VIEW - WITH AGING REPORT  -->
                     <h2>Invoice Management & Reports</h2>
 
                     <?php foreach ($errors as $error): ?>
