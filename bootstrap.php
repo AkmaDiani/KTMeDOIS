@@ -48,8 +48,8 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// Load shared helpers (functions, not classes)
+// Load shared helpers
 require_once ROOT_PATH . '/Application/Helpers/helpers.php';
 
-// Load database connection (provides Database class)
+// Load database connection
 require_once ROOT_PATH . '/Data/db.php';
