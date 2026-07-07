@@ -6,7 +6,7 @@ include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
 include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
 
 ?>
-
+<div class="content">
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Supplier Profile</h1>
 </div>
@@ -54,17 +54,8 @@ include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
                 <div><strong>Member Since:</strong> <?php echo date('d/m/Y'); ?></div>
             </div>
         </div>
-
-        <div class="card card-ktm mt-3">
-            <div class="card-header bg-success text-white"><i class="fas fa-sync"></i> Sync</div>
-            <div class="card-body text-center">
-                <div class="display-1 text-success"><i class="fas fa-check-circle"></i></div>
-                <h3 class="text-success">Active</h3>
-                <p class="text-muted">Vendor status is active</p>
-                <button class="btn btn-primary w-100" onclick="alert('Vendor data synchronized!')"><i class="fas fa-sync me-2"></i> Sync Now</button>
-            </div>
-        </div>
     </div>
+</div>
 </div>
 
 <?php include __DIR__ . '/../SharedUI/footer.php'; ?>
