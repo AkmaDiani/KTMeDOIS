@@ -1,8 +1,12 @@
 <?php
 // Application/Middleware/API_gateways/invoicePdf.php
 
-require_once __DIR__ . '/../../Model/modelM3/Invoice.php';
-require_once __DIR__ . '/vendor/autoload.php';
+require_once ROOT_PATH . '/vendor/autoload.php';
+require_once ROOT_PATH . '/Application/Model/modelM3/Invoice.php';
+require_once ROOT_PATH . '/Application/Model/modelM3/Item.php';
+require_once ROOT_PATH . '/Application/Model/modelM3/DeliveryOrder.php';
+require_once ROOT_PATH . '/Application/Model/modelM3/Supplier.php';
+require_once ROOT_PATH . '/Application/Model/modelM3/Staff.php';
 
 class InvoicePdf {
     private $db;
