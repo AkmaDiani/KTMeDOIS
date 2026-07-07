@@ -8,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?? 'KTM eDOIS' ?></title>
     <link rel="stylesheet" href="/KTMEDOIS/Presentation/Public/assets/style.css">
-    
+    <link rel="stylesheet" href="/KTMedOIS/Presentation/Public/css/app.css">
+
 </head>
 <body>
 
@@ -21,7 +22,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="logo">
-                <a href="/KTMEDOIS/Presentation/Public/index.php?action=dashboard">
+                <a href="/KTMEDOIS/Presentation/Public/indexM1.php?controller=staff&action=dashboard">
                     <span>KTM eDOIS</span>
                 </a>
             </div>
@@ -30,7 +31,7 @@
             <nav class="topbar-nav">
                 <ul>
                     
-                    <li><a href="/KTMEDOIS/Presentation/Public/index.php?action=manage_vendor" class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">Manage Vendor</a></li>
+                    <li><a href="/KTMedOIS/Presentation/Public/indexM1.php?controller=staff&action=vendor_registry" class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">Manage Vendor</a></li>
                     <li><a href="/KTMEDOIS/Presentation/View/Module2/do_history.php" class="<?= $activePage === 'manage_do' ? 'active' : '' ?>">Manage Delivery Order</a></li>
                     <li><a href="/KTMEDOIS/Presentation/Public/index.php?action=invoice_status" class="<?= $activePage === 'invoice_status' ? 'active' : '' ?>">Manage Invoice</a></li>
                     <li><a href="/KTMEDOIS/Presentation/Public/index.php?action=review_document" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Manage & Review Approved Document</a></li>
@@ -45,7 +46,7 @@
                 <span class="role-badge role-<?= strtolower(str_replace(' ', '-', $_SESSION['role'] ?? '')) ?>">
                     <?= htmlspecialchars($_SESSION['role'] ?? '') ?>
                 </span>
-                <a href="/KTMEDOIS/Presentation/Public/index.php?action=logout" class="logout-btn">Logout
+                <a href="/KTMEDOIS/Presentation/Public/indexM1.php?action=logout" class="logout-btn">Logout
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
             </div>
