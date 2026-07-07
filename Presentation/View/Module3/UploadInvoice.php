@@ -45,8 +45,8 @@ class UploadInvoice {
         $pageTitle = $isEdit ? 'Edit Invoice Draft' : 'Submit Invoice';
         $activePage = 'submit_invoice';
 
-        include __DIR__ . '/../SharedUI/topbar.php';
-        include __DIR__ . '/../SharedUI/sidebarM3.php';
+        include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
+        include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM3.php';
         ?>
         <div class="content-area">
 
@@ -59,7 +59,7 @@ class UploadInvoice {
                 <div class="alert alert-success"><?= $this->escape($success) ?></div>
             <?php endforeach; ?>
 
-            <form id="invoiceForm" action="/KTMEDOIS/Presentation/Public/index.php?action=invoice_submit_post" method="post" enctype="multipart/form-data">
+            <form id="invoiceForm" action="/KTMEDOIS/Presentation/Public/indexM3.php?action=invoice_submit_post" method="post" enctype="multipart/form-data">
 
                 <fieldset>
                     <legend>Invoice Header</legend>
