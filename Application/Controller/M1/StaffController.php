@@ -38,6 +38,9 @@ class StaffController
         $showTopbar = true;
         $showSidebar = true;
         include ROOT_PATH . '/Presentation/View/staff/dashboard.php';
+
+        $activePage = 'dashboard';
+        include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
     }
 
     public function profile()
