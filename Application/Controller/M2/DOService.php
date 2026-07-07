@@ -1,9 +1,4 @@
 <?php
-require_once __DIR__ . "/../Model//modelM2/DeliveryOrder.php";
-require_once __DIR__ . "/../Model//modelM2/Item.php";
-require_once __DIR__ . "/../Model//modelM2/Supplier.php";
-require_once __DIR__ . "/../Model//modelM2/Notification.php";
-require_once __DIR__ . "/../Model//modelM2/PO.php";
 
 class DOService
 {
