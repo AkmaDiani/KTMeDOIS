@@ -1,13 +1,9 @@
 <?php
-// ============================================
-// ENTRY POINT - START SESSION
-// ============================================
+//M1
 
 session_start();
 
-// ============================================
 // DATABASE CONNECTIONS
-// ============================================
 $host = 'localhost';
 $port = '3306';
 $username = 'root';
@@ -21,9 +17,7 @@ $conn_supplier = mysqli_connect($host, $username, $password, 'supplier', $port);
 if (!$conn_supplier) die("Supplier DB connection failed: " . mysqli_connect_error());
 mysqli_set_charset($conn_supplier, "utf8mb4");
 
-// ============================================
 // GET PARAMETERS - Support URL Cantik
-// ============================================
 
 $url = $_GET['url'] ?? '';
 
@@ -45,9 +39,7 @@ if (empty($url)) {
     }
 }
 
-// ============================================
 // ROUTE TO CONTROLLER
-// ============================================
 if ($controller == 'auth') {
     require_once __DIR__ . '/../../Application/Controllers/AuthController.php';
     $auth = new AuthController($conn_main, $conn_supplier);
