@@ -1,135 +1,214 @@
 <?php
-// Presentation/Public/index.php
+/**
+ * Presentation_Layer/Web_Interface/public/index.php
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Front controller + router.
+ *
+ * Folder structure (matches the 3-tier architecture slide):
+ *
+ *   Presentation_Layer/
+ *     Web_Interface/
+ *       public/        ← this file lives here (web root)
+ *       views/
+ *
+ *   Application_Layer/
+ *     Backend_API/
+ *       Controllers/    ← DO, Invoice, AuditLog controllers
+ *       Helpers/         ← helpers.php (redirect, e(), flash, etc.)
+ *     Authentication_Service/
+ *       LoginController.php
+ *       StaffAuth.php    ← require_login() / require_role()
+ *     Notification_Service/  (reserved for future notification-specific code)
+ *
+ *   Data_Layer/
+ *     Relational_Database/
+ *       db.php               ← PDO connection
+ *       database_config.php  ← DB_HOST / DB_NAME / etc.
+ *     Logging_Database/
+ *       audit.php            ← audit_log() / notify()
+ *     File_Storage/  (reserved for uploaded documents/images)
+ *
+ * URL scheme is unchanged from the previous version — only file locations moved.
+ */
 
-require_once __DIR__ . '/../../Data/db.php';
-require_once __DIR__ . '/../../Application/Controller/authController.php';
-require_once __DIR__ . '/../../Application/Controller/invoiceController.php';
+session_start();
 
-class FrontController {
-    private $db;
-    private $action;
-    private $allowedActions = [
-        // Auth routes
-        'login',
-        'auth_login',
-        'logout',
-        'dashboard',
-        
-        // Invoice routes - Vendor
-        'invoice_submit',
-        'invoice_submit_post',
-        'invoice_status',
-        'invoice_summary',
-        'invoice_edit',
-        'invoice_pdf',
-        'invoice_preview',
-        'get_do_details',
-        
-        // Invoice routes - Officer
-        'invoice_pending',
-        'invoice_review',
-    ];
+// ── Path roots ────────────────────────────────────────────────────────────────
+$webInterface = dirname(__DIR__);                       // .../Presentation_Layer/Web_Interface
+$presentation = dirname($webInterface);                  // .../Presentation_Layer
+$projectRoot  = dirname($presentation);                  // project root
+$applicationLayer = $projectRoot . '/Application_Layer';
+$dataLayer         = $projectRoot . '/Data_Layer';
 
-    public function __construct($db) {
-        $this->db = $db;
-        $this->action = $_GET['action'] ?? 'login';
+// ── Bootstrap: Data Layer → Application Layer (load order matters) ───────────
+require_once $dataLayer . '/Relational_Database/db.php';
+require_once $dataLayer . '/Logging_Database/audit.php';
+require_once $applicationLayer . '/Backend_API/Helpers/helpers.php';
+require_once $applicationLayer . '/Authentication_Service/StaffAuth.php';
+
+// ── Parse request ─────────────────────────────────────────────────────────────
+$method = $_SERVER['REQUEST_METHOD'];
+
+// Strip base path from REQUEST_URI so this works in a subdirectory.
+$scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$requestUri = $_SERVER['REQUEST_URI'];
+$path = parse_url($requestUri, PHP_URL_PATH);
+if ($scriptDir !== '' && str_starts_with($path, $scriptDir)) {
+    $path = substr($path, strlen($scriptDir));
+}
+$path = '/' . trim($path, '/');
+if ($path === '') $path = '/';
+
+// ── Controller loader ─────────────────────────────────────────────────────────
+function load_controller(string $name): void {
+    global $applicationLayer;
+
+    // LoginController lives in Authentication_Service; the rest live in Backend_API/Controllers
+    if ($name === 'LoginController') {
+        require_once $applicationLayer . '/Authentication_Service/LoginController.php';
+        return;
     }
-
-    public function run() {
-        // Validate action
-        if (!in_array($this->action, $this->allowedActions)) {
-            $this->action = 'login';
-        }
-
-        // Route to appropriate controller
-        switch ($this->action) {
-            // Auth routes
-            case 'login':
-                $controller = new AuthController($this->db);
-                $controller->showLogin();
-                break;
-                
-            case 'auth_login':
-                $controller = new AuthController($this->db);
-                $controller->login();
-                break;
-                
-            case 'logout':
-                $controller = new AuthController($this->db);
-                $controller->logout();
-                break;
-                
-            case 'dashboard':
-                $controller = new AuthController($this->db);
-                $controller->dashboard();
-                break;
-                
-            // Invoice routes - Vendor
-            case 'invoice_submit':
-                $controller = new InvoiceController($this->db);
-                $controller->submitForm();
-                break;
-                
-            case 'invoice_submit_post':
-                $controller = new InvoiceController($this->db);
-                $controller->submit();
-                break;
-                
-            case 'invoice_status':
-                $controller = new InvoiceController($this->db);
-                $controller->status();
-                break;
-                
-            case 'invoice_summary':
-                $controller = new InvoiceController($this->db);
-                $controller->invoiceSummary();
-                break;
-                
-            case 'invoice_edit':
-                $controller = new InvoiceController($this->db);
-                $controller->editInvoice();
-                break;
-                
-            case 'invoice_pdf':
-                $controller = new InvoiceController($this->db);
-                $controller->generatePdf($_GET['id'] ?? 0);
-                break;
-                
-            case 'invoice_preview':
-                $controller = new InvoiceController($this->db);
-                $controller->previewPdf();
-                break;
-                
-            case 'get_do_details':
-                $controller = new InvoiceController($this->db);
-                $controller->getDODetails();
-                break;
-                
-            // Invoice routes - Officer
-            case 'invoice_pending':
-                $controller = new InvoiceController($this->db);
-                $controller->pendingList();
-                break;
-                
-            case 'invoice_review':
-                $controller = new InvoiceController($this->db);
-                $controller->reviewAction();
-                break;
-
-            case 'manage_do':
-                $controller = new DOService($this->db);
-                $controller->getDOHistory();
-                break;
-                
-            default:
-                header('Location: /KTMEDOIS/Presentation/Public/index.php?action=login');
-                exit;
-                
-        }
-    }
+    require_once $applicationLayer . '/Backend_API/Controllers/' . $name . '.php';
 }
 
-// --- EXECUTION ---
-$db = Database::getInstance()->getConnection();
-$frontController = new FrontController($db);
-$frontController->run();
+// ── Route matching ────────────────────────────────────────────────────────────
+function match_route(string $pattern, string $path): array|false {
+    $regex = preg_replace('/\{([a-z_]+)\}/', '(?P<$1>[^/]+)', $pattern);
+    if (preg_match('#^' . $regex . '$#', $path, $m)) {
+        return array_filter($m, 'is_string', ARRAY_FILTER_USE_KEY);
+    }
+    return false;
+}
+
+// ── Router ────────────────────────────────────────────────────────────────────
+
+// ── Auth routes (no session guard) ───────────────────────────────────────────
+if ($path === '/login') {
+    load_controller('LoginController');
+    if ($method === 'GET')  { login_show_form(); exit; }
+    if ($method === 'POST') { csrf_verify(); login_process(); exit; }
+}
+
+if ($path === '/logout' && $method === 'POST') {
+    csrf_verify();
+    load_controller('LoginController');
+    login_logout();
+    exit;
+}
+
+// ── Root → redirect ───────────────────────────────────────────────────────────
+if ($path === '/') {
+    require_login();
+    redirect('delivery-orders');
+}
+
+// ── Delivery Order routes ─────────────────────────────────────────────────────
+if ($path === '/delivery-orders' && $method === 'GET') {
+    require_login();
+    load_controller('DeliveryOrderController');
+    do_index();
+    exit;
+}
+
+if (($p = match_route('/delivery-orders/{id}/export', $path)) !== false && $method === 'GET') {
+    require_login();
+    load_controller('DeliveryOrderController');
+    do_export_pdf((int)$p['id']);
+    exit;
+}
+
+if (($p = match_route('/delivery-orders/{id}/assign', $path)) !== false && $method === 'POST') {
+    require_login();
+    csrf_verify();
+    load_controller('DeliveryOrderController');
+    do_assign_reviewer((int)$p['id']);
+    exit;
+}
+
+if (($p = match_route('/delivery-orders/{id}/approve', $path)) !== false && $method === 'POST') {
+    require_login();
+    csrf_verify();
+    load_controller('DeliveryOrderController');
+    do_approve((int)$p['id']);
+    exit;
+}
+
+if (($p = match_route('/delivery-orders/{id}/reject', $path)) !== false && $method === 'POST') {
+    require_login();
+    csrf_verify();
+    load_controller('DeliveryOrderController');
+    do_reject((int)$p['id']);
+    exit;
+}
+
+if (($p = match_route('/delivery-orders/{id}', $path)) !== false && $method === 'GET') {
+    require_login();
+    load_controller('DeliveryOrderController');
+    do_show((int)$p['id']);
+    exit;
+}
+
+// ── Invoice routes ────────────────────────────────────────────────────────────
+if ($path === '/invoices' && $method === 'GET') {
+    require_login();
+    load_controller('InvoiceController');
+    invoice_index();
+    exit;
+}
+
+if (($p = match_route('/invoices/{id}/export', $path)) !== false && $method === 'GET') {
+    require_login();
+    load_controller('InvoiceController');
+    invoice_export_pdf((int)$p['id']);
+    exit;
+}
+
+if (($p = match_route('/invoices/{id}/forward', $path)) !== false && $method === 'POST') {
+    require_login();
+    csrf_verify();
+    load_controller('InvoiceController');
+    invoice_forward_to_finance((int)$p['id']);
+    exit;
+}
+
+if (($p = match_route('/invoices/{id}/status', $path)) !== false && $method === 'POST') {
+    require_login();
+    csrf_verify();
+    load_controller('InvoiceController');
+    invoice_update_status((int)$p['id']);
+    exit;
+}
+
+if (($p = match_route('/invoices/{id}/reject', $path)) !== false && $method === 'POST') {
+    require_login();
+    csrf_verify();
+    load_controller('InvoiceController');
+    invoice_reject((int)$p['id']);
+    exit;
+}
+
+if (($p = match_route('/invoices/{id}', $path)) !== false && $method === 'GET') {
+    require_login();
+    load_controller('InvoiceController');
+    invoice_show((int)$p['id']);
+    exit;
+}
+
+// ── Audit log routes ──────────────────────────────────────────────────────────
+if ($path === '/audit-log/export' && $method === 'GET') {
+    require_login();
+    load_controller('AuditLogController');
+    auditlog_export_pdf();
+    exit;
+}
+
+if ($path === '/audit-log' && $method === 'GET') {
+    require_login();
+    load_controller('AuditLogController');
+    auditlog_index();
+    exit;
+}
+
+// ── 404 ───────────────────────────────────────────────────────────────────────
+http_response_code(404);
+echo '<h1>404 — Page Not Found</h1><p><a href="' . url('delivery-orders') . '">Go home</a></p>';
