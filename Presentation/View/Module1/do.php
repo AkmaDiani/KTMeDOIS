@@ -6,10 +6,9 @@ include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
 include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
 
 ?>
-
+<div class="content">
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">My Delivery Orders</h1>
-    <span class="badge bg-primary">Total: <?php echo count($doList); ?></span>
 </div>
 
 <div class="card card-ktm">
@@ -46,6 +45,7 @@ include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
             </table>
         </div>
     </div>
+</div>
 </div>
 
 <?php include __DIR__ . '/../SharedUI/footer.php'; ?>
