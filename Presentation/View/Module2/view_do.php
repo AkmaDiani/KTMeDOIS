@@ -1,125 +1,100 @@
 <?php
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../../bootstrap.php';
 
-session_start();
-
-$supplier_id = $_SESSION['supplier_id'];
-
-$do_id = $_GET["id"] ?? null;
-
-$service = new DOService($pdo);
-$result = $service->getDODetails($do_id, (int)$supplier_id);
-
-if (!$result) {
-    die("Delivery Order not found or access denied.");
+if (!isset($_SESSION['supplier_id']) || $_SESSION['user_type'] !== 'supplier') {
+    header('Location: /KTMeDOIS/Presentation/Public/indexM1.php?controller=auth&action=login');
+    exit;
 }
 
-$do = $result["do"];
-$items = $result["items"];
+$do_id = $_GET['id'] ?? null;
+if (!$do_id) {
+    die('Invalid DO ID.');
+}
+
+$supplier_id = (int)$_SESSION['supplier_id'];
+
+$pdo = Database::getInstance()->getConnection();
+
+$service = new DOService($pdo);
+$result = $service->getDODetails($do_id, $supplier_id);
+
+if (!$result) {
+    die('Delivery Order not found or access denied.');
+}
+
+$do = $result['do'];
+$items = $result['items'];
+
+$title = 'View Delivery Order - KTM eDOIS';
+$activePage = 'manage_do';
+
+include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
+include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM2.php';
 ?>
 
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>DO Submission Detail</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #f5f7fb;
-            padding: 30px;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 900px;
-            margin: auto;
-            box-shadow: 0 2px 8px #ccc;
-        }
-
-        h2 {
-            color: #0057d9;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        th {
-            background: #f1f4f9;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 15px;
-            background: #0057d9;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            margin-right: 10px;
-            margin-bottom: 8px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <?php include("../SharedUI/sidebarM2.php"); ?>
-
-    <div class="content"></div>
-
-    <div class="card">
+<div class="content">
+    <div class="container-fluid">
         <h2>Delivery Order Submission Detail</h2>
 
-        <p><b>DO Number:</b> <?= htmlspecialchars($do["DO_number"]) ?></p>
-        <p><b>PO Number:</b> <?= htmlspecialchars($do["PO_number"]) ?></p>
-        <p><b>Supplier:</b> <?= htmlspecialchars($do["Supplier_name"]) ?></p>
-        <p><b>Status:</b> <?= htmlspecialchars($do["Status"]) ?></p>
-        <p><b>Created Date:</b> <?= htmlspecialchars($do["created_date"]) ?></p>
+        <div class="card-ktm">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6"><strong>DO Number:</strong> <?= htmlspecialchars($do['DO_number']) ?></div>
+                    <div class="col-md-6"><strong>PO Number:</strong> <?= htmlspecialchars($do['PO_number']) ?></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6"><strong>Supplier:</strong> <?= htmlspecialchars($do['Supplier_name']) ?></div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong>
+                        <?php
+                        $statusClass = str_replace(' ', '-', strtolower($do['Status'] ?? ''));
+                        ?>
+                        <span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars($do['Status']) ?></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6"><strong>Created Date:</strong> <?= htmlspecialchars($do['created_date']) ?></div>
+                </div>
 
-        <h3>Submitted Files</h3>
+                <h4>Submitted Files</h4>
+                <div class="mb-3">
+                    <a class="btn btn-primary btn-sm" target="_blank" href="view_file.php?id=<?= urlencode($do_id) ?>&type=do">View DO File</a>
+                    <a class="btn btn-primary btn-sm" target="_blank" href="view_file.php?id=<?= urlencode($do_id) ?>&type=proof">View Proof File</a>
+                </div>
 
-        <a class="btn" target="_blank" href="../../Application/Controllers/view_file.php?id=<?= urlencode($do_id) ?>&type=do">
-            View DO File
-        </a>
+                <h4>Item Details</h4>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Item No</th>
+                                <th>Description</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($items)): ?>
+                                <?php foreach ($items as $item): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($item['item_no']) ?></td>
+                                        <td><?= htmlspecialchars($item['item_description']) ?></td>
+                                        <td><?= htmlspecialchars($item['quantity']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="3" class="empty-row">No items found.</td></tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
 
-        <a class="btn" target="_blank" href="../../Application/Controllers/view_file.php?id=<?= urlencode($do_id) ?>&type=proof">
-            View Proof File
-        </a>
-
-        <h3>Item Details</h3>
-
-        <table>
-            <tr>
-                <th>Item No</th>
-                <th>Description</th>
-                <th>Quantity</th>
-            </tr>
-
-            <?php foreach ($items as $item): ?>
-                <tr>
-                    <td><?= htmlspecialchars($item["item_no"]) ?></td>
-                    <td><?= htmlspecialchars($item["item_description"]) ?></td>
-                    <td><?= htmlspecialchars($item["quantity"]) ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </table>
-
-        <br>
-        <a class="btn" href="submit_do.php">Submit Another DO</a>
-        <a class="btn" href="do_history.php">Back to My DOs</a>
+                <div class="mt-3">
+                    <a class="btn btn-primary" href="submit_do.php">Submit Another DO</a>
+                    <a class="btn btn-outline" href="do_history.php">Back to My DOs</a>
+                </div>
+            </div>
+        </div>
     </div>
-    </div>
-</body>
+</div>
 
-</html>
+<?php include ROOT_PATH . '/Presentation/View/SharedUI/footer.php'; ?>
