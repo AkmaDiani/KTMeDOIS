@@ -1,61 +1,57 @@
 <?php
-// ============================================
-// EXTERNAL SUPPLIER MODEL
-// ============================================
+// Application/Model/modelM1/ExternalSupplierModel.php
 
 class ExternalSupplierModel
 {
-    private $conn;
+    private $pdo;
 
-    public function __construct($conn)
+    public function __construct(PDO $pdo)
     {
-        $this->conn = $conn;
+        $this->pdo = $pdo;
     }
 
     public function find($id)
     {
-        $id = mysqli_real_escape_string($this->conn, $id);
-        $query = "SELECT * FROM supplier WHERE SUPPLIERID = '$id'";
-        $result = mysqli_query($this->conn, $query);
-        return mysqli_fetch_assoc($result);
+        $stmt = $this->pdo->prepare("SELECT * FROM supplier WHERE SUPPLIERID = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function findByUsername($username)
     {
-        $username = mysqli_real_escape_string($this->conn, $username);
-        $query = "SELECT * FROM supplier WHERE username = '$username' AND SUPPLIER_CTC_STATUS = 'Active'";
-        $result = mysqli_query($this->conn, $query);
-        return mysqli_fetch_assoc($result);
+        $stmt = $this->pdo->prepare("SELECT * FROM supplier WHERE username = ? AND SUPPLIER_CTC_STATUS = 'Active'");
+        $stmt->execute([$username]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function findByEmail($email)
     {
-        $email = mysqli_real_escape_string($this->conn, $email);
-        $query = "SELECT * FROM supplier WHERE SUPPLIER_EMAIL_ADD = '$email' AND SUPPLIER_CTC_STATUS = 'Active'";
-        $result = mysqli_query($this->conn, $query);
-        return mysqli_fetch_assoc($result);
+        $stmt = $this->pdo->prepare("SELECT * FROM supplier WHERE SUPPLIER_EMAIL_ADD = ? AND SUPPLIER_CTC_STATUS = 'Active'");
+        $stmt->execute([$email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function findByUsernameOrEmail($input)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM supplier WHERE (username = ? OR SUPPLIER_EMAIL_ADD = ?) AND SUPPLIER_CTC_STATUS = 'Active'");
+        $stmt->execute([$input, $input]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function verifyPassword($supplier, $password)
     {
-        return md5($password) == $supplier['password'];
+        return md5($password) == ($supplier['password'] ?? '');
     }
 
     public function updateLastLogin($id)
     {
-        $id = mysqli_real_escape_string($this->conn, $id);
-        $query = "UPDATE supplier SET last_login = NOW() WHERE SUPPLIERID = '$id'";
-        return mysqli_query($this->conn, $query);
+        $stmt = $this->pdo->prepare("UPDATE supplier SET last_login = NOW() WHERE SUPPLIERID = ?");
+        return $stmt->execute([$id]);
     }
 
     public function getActiveSuppliers()
     {
-        $query = "SELECT * FROM supplier WHERE SUPPLIER_CTC_STATUS = 'Active' ORDER BY SUPPLIER_COMP_NAME";
-        $result = mysqli_query($this->conn, $query);
-        $data = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $data[] = $row;
-        }
-        return $data;
+        $stmt = $this->pdo->query("SELECT * FROM supplier WHERE SUPPLIER_CTC_STATUS = 'Active' ORDER BY SUPPLIER_COMP_NAME");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
