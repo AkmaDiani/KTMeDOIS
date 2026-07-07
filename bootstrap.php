@@ -46,6 +46,7 @@ spl_autoload_register(function ($class) {
 
 // Load shared helper functions
 require_once ROOT_PATH . '/Application/Helpers/functions.php';
+require_once ROOT_PATH . '/Data/db.php';
 
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
