@@ -1,0 +1,39 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /SDW/KTMeDOIS/
+    
+    # Redirect root to login
+    RewriteRule ^$ Presentation/Public/index.php [L]
+    
+    # Staff URLs
+    RewriteRule ^staff/dashboard$ Presentation/Public/index.php?controller=staff&action=dashboard [L]
+    RewriteRule ^staff/profile$ Presentation/Public/index.php?controller=staff&action=profile [L]
+    RewriteRule ^staff/vendor$ Presentation/Public/index.php?controller=staff&action=vendor_registry [L]
+    RewriteRule ^staff/vendor/report$ Presentation/Public/index.php?controller=staff&action=vendor_report [L]
+    RewriteRule ^staff/vendor/add$ Presentation/Public/index.php?controller=staff&action=vendor_create [L]
+    RewriteRule ^staff/vendor/edit/([0-9]+)$ Presentation/Public/index.php?controller=staff&action=vendor_edit&id=$1 [L]
+    RewriteRule ^staff/vendor/view/([0-9]+)$ Presentation/Public/index.php?controller=staff&action=vendor_view&id=$1 [L]
+    RewriteRule ^staff/vendor/delete/([0-9]+)$ Presentation/Public/index.php?controller=staff&action=vendor_delete&id=$1 [L]
+    
+    # Supplier URLs
+    RewriteRule ^supplier/dashboard$ Presentation/Public/index.php?controller=supplier&action=dashboard [L]
+    RewriteRule ^supplier/do$ Presentation/Public/index.php?controller=supplier&action=do [L]
+    RewriteRule ^supplier/payment$ Presentation/Public/index.php?controller=supplier&action=payment [L]
+    RewriteRule ^supplier/profile$ Presentation/Public/index.php?controller=supplier&action=profile [L]
+    
+    # Auth URLs
+    RewriteRule ^login$ Presentation/Public/index.php?controller=auth&action=login [L]
+    RewriteRule ^logout$ Presentation/Public/index.php?controller=auth&action=logout [L]
+    
+    # API URLs
+    RewriteRule ^api/supplier/([0-9]+)$ Presentation/Public/index.php?api=1&action=supplier&id=$1 [L]
+    RewriteRule ^api/do/([0-9]+)$ Presentation/Public/index.php?api=1&action=do&id=$1 [L]
+    RewriteRule ^api/payment/([0-9]+)$ Presentation/Public/index.php?api=1&action=payment&id=$1 [L]
+    RewriteRule ^api/suppliers$ Presentation/Public/index.php?api=1&action=all [L]
+    RewriteRule ^api/sync/([0-9]+)$ Presentation/Public/index.php?api=1&action=sync&id=$1 [L]
+    
+    # Fallback
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ Presentation/Public/index.php?url=$1 [QSA,L]
+</IfModule>
