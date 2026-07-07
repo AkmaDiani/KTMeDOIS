@@ -24,8 +24,8 @@ if (!class_exists('InvoiceSummary')) {
         public function displaySummary(): void {
             $isVendorView = ($this->role === 'Vendor');
             $backUrl = $isVendorView 
-                ? '/KTMEDOIS/Presentation/Public/index.php?action=invoice_status' 
-                : '/KTMEDOIS/Presentation/Public/index.php?action=invoice_pending';
+                ? '/KTMEDOIS/Presentation/Public/indexM3.php?action=invoice_status' 
+                : '/KTMEDOIS/Presentation/Public/indexM3.php?action=invoice_pending';
 
             $pageTitle = 'Invoice Summary';
             $activePage = 'invoice_claims';
@@ -36,8 +36,8 @@ if (!class_exists('InvoiceSummary')) {
             $staff = $this->staff;
             $proofLink = $this->proofLink;
 
-            include __DIR__ . '/../SharedUI/topbar.php';
-            include __DIR__ . '/../SharedUI/sidebarM3.php';
+            include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
+            include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM3.php';
             ?>
             <div class="content-area">
                 <div class="summary-container">
