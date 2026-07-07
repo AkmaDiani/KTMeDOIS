@@ -13,10 +13,10 @@ class AuthController
     private $conn;
     private $conn_supplier;
 
-    public function __construct($conn, $conn_supplier)
+    public function __construct($conn, $conn_supplier = null)
     {
         $this->conn = $conn;
-        $this->conn_supplier = $conn_supplier;
+        $this->conn_supplier = $conn_supplier ?? $conn;
     }
 
     public function login()
