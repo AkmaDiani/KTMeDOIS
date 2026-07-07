@@ -1,66 +1,53 @@
 <?php
-// ============================================
-// PAYMENT MODEL
-// ============================================
+// Application/Model/modelM1/PaymentModel.php
 
 class PaymentModel
 {
-    private $conn;
+    private $pdo;
 
-    public function __construct($conn)
+    public function __construct(PDO $pdo)
     {
-        $this->conn = $conn;
+        $this->pdo = $pdo;
     }
 
     public function getBySupplier($supplierId)
     {
-        $supplierId = mysqli_real_escape_string($this->conn, $supplierId);
-        $query = "SELECT p.*, i.Invoice_num, i.Total as Invoice_Total 
-                  FROM payment p 
-                  LEFT JOIN invoice i ON p.Invoice_ID = i.Invoice_id 
-                  WHERE p.Supplier_ID = '$supplierId' 
-                  ORDER BY p.Created_At DESC";
-        $result = mysqli_query($this->conn, $query);
-        $data = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $data[] = $row;
-        }
-        return $data;
+        $stmt = $this->pdo->prepare("SELECT p.*, i.Invoice_num, i.Total as Invoice_Total 
+                                      FROM payment p 
+                                      LEFT JOIN invoice i ON p.Invoice_ID = i.Invoice_id 
+                                      WHERE p.Supplier_ID = ? 
+                                      ORDER BY p.Created_At DESC");
+        $stmt->execute([$supplierId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getSummary($supplierId)
     {
-        $supplierId = mysqli_real_escape_string($this->conn, $supplierId);
-        $totalPaid = $this->getTotalByStatus($supplierId, 'Paid');
-        $totalPending = $this->getTotalByStatus($supplierId, 'Pending');
-        $totalProcessing = $this->getTotalByStatus($supplierId, 'Processing');
-        $totalCount = $this->getCount($supplierId);
         return [
-            'total_paid' => $totalPaid,
-            'total_pending' => $totalPending,
-            'total_processing' => $totalProcessing,
-            'total_count' => $totalCount,
-            'total_amount' => $totalPaid + $totalPending + $totalProcessing
+            'total_paid' => $this->getTotalByStatus($supplierId, 'Paid'),
+            'total_pending' => $this->getTotalByStatus($supplierId, 'Pending'),
+            'total_processing' => $this->getTotalByStatus($supplierId, 'Processing'),
+            'total_count' => $this->getCount($supplierId),
+            'total_amount' => $this->getTotalByStatus($supplierId, 'Paid') 
+                            + $this->getTotalByStatus($supplierId, 'Pending')
+                            + $this->getTotalByStatus($supplierId, 'Processing')
         ];
     }
 
     private function getTotalByStatus($supplierId, $status)
     {
-        $supplierId = mysqli_real_escape_string($this->conn, $supplierId);
-        $status = mysqli_real_escape_string($this->conn, $status);
-        $query = "SELECT SUM(Payment_Amount) as total FROM payment 
-                  WHERE Supplier_ID = '$supplierId' AND Payment_Status = '$status'";
-        $result = mysqli_query($this->conn, $query);
-        $row = mysqli_fetch_assoc($result);
-        return $row['total'] ?? 0;
+        $stmt = $this->pdo->prepare("SELECT SUM(Payment_Amount) as total FROM payment 
+                                      WHERE Supplier_ID = ? AND Payment_Status = ?");
+        $stmt->execute([$supplierId, $status]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
     }
 
     private function getCount($supplierId)
     {
-        $supplierId = mysqli_real_escape_string($this->conn, $supplierId);
-        $query = "SELECT COUNT(*) as count FROM payment WHERE Supplier_ID = '$supplierId'";
-        $result = mysqli_query($this->conn, $query);
-        $row = mysqli_fetch_assoc($result);
-        return $row['count'] ?? 0;
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM payment WHERE Supplier_ID = ?");
+        $stmt->execute([$supplierId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] ?? 0;
     }
 }
