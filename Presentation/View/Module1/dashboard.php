@@ -87,18 +87,19 @@ include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($row = mysqli_fetch_assoc($recentDO)): ?>
-                        <tr>
-                            <td><?php echo $row['DO_number']; ?></td>
-                            <td><?php echo $row['PO_number']; ?></td>
-                            <td><?php echo getStatusBadge($row['Status']); ?></td>
-                            <td><?php echo date('d/m/Y', strtotime($row['created_date'])); ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                    <?php if (mysqli_num_rows($recentDO) == 0): ?>
+                    <?php if (empty($recentDO)): ?>
                         <tr>
                             <td colspan="4" class="text-center text-muted py-3"><i class="fas fa-info-circle"></i> No delivery orders found.</td>
                         </tr>
+                    <?php else: ?>
+                        <?php foreach ($recentDO as $row): ?>
+                            <tr>
+                                <td><?php echo $row['DO_number']; ?></td>
+                                <td><?php echo $row['PO_number']; ?></td>
+                                <td><?php echo getStatusBadge($row['Status']); ?></td>
+                                <td><?php echo date('d/m/Y', strtotime($row['created_date'])); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -106,4 +107,4 @@ include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../SharedUI/footer.php'; ?>
+<?php include ROOT_PATH . '/Presentation/View/SharedUI/footer.php'; ?>
