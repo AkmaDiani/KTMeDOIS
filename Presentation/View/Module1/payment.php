@@ -2,6 +2,7 @@
 $title = 'Payment Status - KTM eDOIS';
 $showTopbar = true;
 $showSidebar = true;
+require_once __DIR__ . '/../../bootstrap.php';
 include __DIR__ . '/../SharedUI/topbar.php';
 ?>
 
