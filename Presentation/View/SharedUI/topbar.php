@@ -1,5 +1,7 @@
 <?php
 // Presentation/View/SharedUI/topbar.php
+$userType = $_SESSION['user_type'] ?? '';
+$role = $_SESSION['role'] ?? '';
 ?>
 <!DOCTYPE html>
 <html>
@@ -12,7 +14,6 @@
 <body>
 
 <div class="app-container">
-    
     <!-- TOP BAR -->
     <header class="topbar">
         <div class="topbar-left">
@@ -28,11 +29,35 @@
         <div class="topbar-center">
             <nav class="topbar-nav">
                 <ul>
-                    <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=vendor_registry" class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">Manage Vendor</a></li>
-                    <li><a href="/KTMeDOIS/Presentation/View/Module2/do_history.php" class="<?= $activePage === 'manage_do' ? 'active' : '' ?>">Manage Delivery Order</a></li>
-                    <li><a href="/KTMeDOIS/Presentation/Public/indexM3.php?action=invoice_status" class="<?= $activePage === 'invoice_status' ? 'active' : '' ?>">Manage Invoice</a></li>
-                    <li><a href="/KTMeDOIS/Presentation/Public/indexM4.php?action=review_document" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Manage & Review Approved Document</a></li>
-                    <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=notifications" class="<?= $activePage === 'notifications' ? 'active' : '' ?>">Notifications</a></li>
+                    <?php if ($userType === 'staff' || $userType === 'supplier'): ?>
+                        <!-- ===== COMMON MODULE NAVIGATION (both roles see these) ===== -->
+                        
+                        <!-- "Manage Vendor" – smart link: staff → vendor_registry, supplier → dashboard -->
+                        <li>
+                            <a href="<?= ($userType === 'staff') 
+                                ? '/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=vendor_registry' 
+                                : '/KTMeDOIS/Presentation/Public/indexM1.php?controller=supplier&action=dashboard' ?>"
+                               class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">
+                                Manage Vendor
+                            </a>
+                        </li>
+                        <li><a href="/KTMeDOIS/Presentation/View/Module2/do_history.php" class="<?= $activePage === 'manage_do' ? 'active' : '' ?>">Manage Delivery Order</a></li>
+                        <li><a href="/KTMeDOIS/Presentation/Public/indexM3.php?action=invoice_status" class="<?= $activePage === 'invoice_status' ? 'active' : '' ?>">Manage Invoice</a></li>
+                        <li><a href="/KTMeDOIS/Presentation/Public/indexM4.php?action=review_document" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Review Documents</a></li>
+                        <li>
+                            <a href="<?= ($userType === 'staff') 
+                                ? '/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=notifications' 
+                                : '/KTMeDOIS/Presentation/Public/indexM1.php?controller=supplier&action=notifications' ?>"
+                               class="<?= $activePage === 'notifications' ? 'active' : '' ?>">
+                                Notifications
+                            </a>
+                        </li>
+                    <?php else: ?>
+                        <!-- GUEST (not logged in) -->
+                        <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=auth&action=login">Login</a></li>
+                    <?php endif; ?>
+                    
+                    <!-- Common "User" link (maybe profile) -->
                     <li><a href="#" class="<?= $activePage === 'user' ? 'active' : '' ?>">User</a></li>
                 </ul>
             </nav>
@@ -40,7 +65,7 @@
         <div class="topbar-right">
             <div class="user-profile">
                 <span class="username">
-                    <?php 
+                    <?php
                     if (isset($_SESSION['supplier_name'])) {
                         echo htmlspecialchars($_SESSION['supplier_name']);
                     } elseif (isset($_SESSION['username'])) {
@@ -60,7 +85,5 @@
         </div>
     </header>
 
-    
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
     <div class="main-wrapper">
