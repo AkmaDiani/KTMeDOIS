@@ -1,104 +1,81 @@
 <?php
-//M1
-// AUTH CONTROLLER - Staff + Supplier Login
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require_once __DIR__ . '/../../Helpers/functions.php';
+// Application/Controller/M1/AuthController.php
 
 class AuthController
 {
-    private $conn;
-    private $conn_supplier;
+    private $pdo;
+    private $supplierPdo;
 
-    public function __construct($conn, $conn_supplier = null)
+    public function __construct(PDO $pdo, PDO $supplierPdo = null)
     {
-        $this->conn = $conn;
-        $this->conn_supplier = $conn_supplier ?? $conn;
+        $this->pdo = $pdo;
+        $this->supplierPdo = $supplierPdo ?? $pdo;
     }
 
     public function login()
     {
-        // If already logged in as staff
         if (isset($_SESSION['user_id']) && $_SESSION['user_type'] === 'staff') {
-            header('Location: /KTMeDOIS/Presentation/View/Staff/dashboard');
-            exit();
+            header('Location: ' . ROOT_PATH . '/Presentation/View/Staff/dashboard');
+            exit;
         }
-
-        // If already logged in as supplier
         if (isset($_SESSION['supplier_id']) && $_SESSION['user_type'] === 'supplier') {
-            header('Location: /KTMeDOIS/Presentation/View/Module1/dashboard');
-            exit();
+            header('Location: ' . ROOT_PATH . '/Presentation/View/Module1/dashboard');
+            exit;
         }
 
         $error = '';
 
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $username = mysqli_real_escape_string($this->conn, $_POST['username']);
-            $password = mysqli_real_escape_string($this->conn, $_POST['password']);
-            $login_type = mysqli_real_escape_string($this->conn, $_POST['login_type']);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $username = trim($_POST['username'] ?? '');
+            $password = trim($_POST['password'] ?? '');
+            $login_type = $_POST['login_type'] ?? '';
 
-            if ($login_type == 'staff') {
-                // STAFF LOGIN
-                $role = mysqli_real_escape_string($this->conn, $_POST['role']);
+            if ($login_type === 'staff') {
+                $role = $_POST['role'] ?? '';
 
-                $query = "SELECT * FROM `ktm staff` WHERE Username = '$username' AND Status = 'Active'";
-                $result = mysqli_query($this->conn, $query);
+                $stmt = $this->pdo->prepare("SELECT * FROM `ktm staff` WHERE Username = ? AND Status = 'Active'");
+                $stmt->execute([$username]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if (mysqli_num_rows($result) == 1) {
-                    $user = mysqli_fetch_assoc($result);
+                if ($user && $password === $user['Password_Hash']) {
+                    if ($role === $user['Role']) {
+                        $_SESSION['user_id'] = $user['User_ID'];
+                        $_SESSION['username'] = $user['Username'];
+                        $_SESSION['role'] = $user['Role'];
+                        $_SESSION['user_type'] = 'staff';
 
-                    if ($password == $user['Password_Hash']) {
-                        if ($role == $user['Role']) {
-                            $_SESSION['user_id'] = $user['User_ID'];
-                            $_SESSION['username'] = $user['Username'];
-                            $_SESSION['role'] = $user['Role'];
-                            $_SESSION['user_type'] = 'staff';
+                        $update = $this->pdo->prepare("UPDATE `ktm staff` SET Last_Login = NOW() WHERE User_ID = ?");
+                        $update->execute([$user['User_ID']]);
 
-                            $updateQuery = "UPDATE `ktm staff` SET Last_Login = NOW() WHERE User_ID = " . $user['User_ID'];
-                            mysqli_query($this->conn, $updateQuery);
-
-                            header('Location: /KTMeDOIS/Presentation/View/Staff/dashboard');
-                            exit();
-                        } else {
-                            $error = 'Invalid role selected. Please choose the correct role.';
-                        }
+                        header('Location: ' . ROOT_PATH . '/Presentation/View/Staff/dashboard');
+                        exit;
                     } else {
-                        $error = 'Invalid password. Please try again.';
+                        $error = 'Invalid role selected.';
                     }
                 } else {
-                    $error = 'Invalid username. Please check your credentials.';
+                    $error = 'Invalid username or password.';
                 }
-            } elseif ($login_type == 'supplier') {
-                // SUPPLIER LOGIN - MODULE 1
-                $query = "SELECT * FROM supplier WHERE (username = '$username' OR SUPPLIER_EMAIL_ADD = '$username') AND SUPPLIER_CTC_STATUS = 'Active'";
-                $result = mysqli_query($this->conn_supplier, $query);
+            } elseif ($login_type === 'supplier') {
+                $stmt = $this->supplierPdo->prepare("SELECT * FROM supplier WHERE (username = ? OR SUPPLIER_EMAIL_ADD = ?) AND SUPPLIER_CTC_STATUS = 'Active'");
+                $stmt->execute([$username, $username]);
+                $supplier = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if (mysqli_num_rows($result) == 1) {
-                    $supplier = mysqli_fetch_assoc($result);
-                    $hashedPassword = md5($password);
+                if ($supplier && md5($password) === ($supplier['password'] ?? '')) {
+                    syncSupplierToMain($supplier['SUPPLIERID']);
 
-                    if ($hashedPassword == $supplier['password']) {
-                        syncSupplierToMain($supplier['SUPPLIERID']);
+                    $_SESSION['supplier_id'] = $supplier['SUPPLIERID'];
+                    $_SESSION['supplier_name'] = $supplier['SUPPLIER_COMP_NAME'];
+                    $_SESSION['supplier_email'] = $supplier['SUPPLIER_EMAIL_ADD'];
+                    $_SESSION['user_type'] = 'supplier';
+                    $_SESSION['role'] = 'Supplier';
 
-                        $_SESSION['supplier_id'] = $supplier['SUPPLIERID'];
-                        $_SESSION['supplier_name'] = $supplier['SUPPLIER_COMP_NAME'];
-                        $_SESSION['supplier_email'] = $supplier['SUPPLIER_EMAIL_ADD'];
-                        $_SESSION['user_type'] = 'supplier';
-                        $_SESSION['role'] = 'Supplier';
+                    $update = $this->supplierPdo->prepare("UPDATE supplier SET last_login = NOW() WHERE SUPPLIERID = ?");
+                    $update->execute([$supplier['SUPPLIERID']]);
 
-                        $updateQuery = "UPDATE supplier SET last_login = NOW() WHERE SUPPLIERID = '{$supplier['SUPPLIERID']}'";
-                        mysqli_query($this->conn_supplier, $updateQuery);
-
-                        header('Location: /KTMeDOIS/Presentation/View/Module1/dashboard');
-                        exit();
-                    } else {
-                        $error = 'Invalid password. Please try again.';
-                    }
+                    header('Location: ' . ROOT_PATH . '/Presentation/View/Module1/dashboard');
+                    exit;
                 } else {
-                    $error = 'Invalid username. Please check your credentials.';
+                    $error = 'Invalid supplier credentials.';
                 }
             }
         }
@@ -106,41 +83,35 @@ class AuthController
         $title = 'Login - KTM eDOIS';
         $showTopbar = false;
         $showSidebar = false;
-        include __DIR__ . '/../../../Presentation/View/auth/login.php';
+        include ROOT_PATH . '/Presentation/View/auth/login.php';
     }
 
     public function logout()
     {
-        $_SESSION = array();
-
+        $_SESSION = [];
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
-            setcookie(
-                session_name(),
-                '',
-                time() - 42000,
-                $params["path"],
-                $params["domain"],
-                $params["secure"],
-                $params["httponly"]
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
             );
         }
-
         session_destroy();
-        header('Location: /KTMeDOIS/login');
-        exit();
+        header('Location: ' . ROOT_PATH . '/login');
+        exit;
     }
 
-    public function showLogin() {
-        session_start();
+    public function showLogin()
+    {
         if (isset($_SESSION['user_id'])) {
-            if ($_SESSION['role'] === 'Vendor') {
-                header('Location: /KTMEDOIS/Presentation/Public/index.php?action=invoice_status');
+            $role = $_SESSION['role'] ?? '';
+            if ($role === 'Vendor' || $role === 'Supplier') {
+                header('Location: ' . ROOT_PATH . '/Presentation/Public/index.php?action=invoice_status');
             } else {
-                header('Location: /KTMEDOIS/Presentation/Public/index.php?action=invoice_pending');
+                header('Location: ' . ROOT_PATH . '/Presentation/Public/index.php?action=invoice_pending');
             }
             exit;
         }
-        include __DIR__ . '/../../Presentation/View/auth/login.php';
+        include ROOT_PATH . '/Presentation/View/auth/login.php';
     }
 }
