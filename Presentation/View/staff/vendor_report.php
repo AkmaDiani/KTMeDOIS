@@ -2,15 +2,14 @@
 $title = 'Vendor Activity & Status Report - KTM eDOIS';
 $showTopbar = true;
 $showSidebar = true;
-include __DIR__ . '/../SharedUI/topbar.php';
-?>
+include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
+include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
 
+?>
+<div class="content">
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Vendor Activity & Status Report</h1>
-    <div>
-        <button class="btn btn-success me-2" onclick="saveReport()"><i class="fas fa-save"></i> Save</button>
-        <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
-    </div>
+    
 </div>
 
 <div class="card card-ktm mb-4">
@@ -106,8 +105,8 @@ include __DIR__ . '/../SharedUI/topbar.php';
                     <?php if ($filteredCount > 0): ?>
                         <?php foreach ($vendors as $row): ?>
                             <tr>
-                                <td><i class="fas fa-user-circle text-primary me-1"></i> <?php echo htmlspecialchars($row['Contac_person']); ?></td>
-                                <td>KTM<?php echo str_pad($row['Vendor_Number'], 6, '0', STR_PAD_LEFT); ?></td>
+                                <td><i class="fas fa-user-circle text-primary me-1"></i> <?php echo htmlspecialchars($row['Contact_person']); ?></td>
+                                <td><?php echo str_pad($row['Vendor_Number'], 6, '0', STR_PAD_LEFT); ?></td>
                                 <td><?php echo htmlspecialchars($row['Supplier_name']); ?></td>
                                 <td><?php
                                     $status = $row['status'] ?? 'Pending Verification';
@@ -117,8 +116,8 @@ include __DIR__ . '/../SharedUI/topbar.php';
                                     elseif ($status == 'Inactive') $class = 'status-inactive';
                                     ?><span class="<?php echo $class; ?>"><i class="fas fa-circle me-1" style="font-size:8px;"></i> <?php echo $status; ?></span></td>
                                 <td>
-                                    <a href="/SDW/KTMeDOIS/staff/vendor/view/<?php echo $row['Supplier_id']; ?>" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
-                                    <a href="/SDW/KTMeDOIS/staff/vendor/edit/<?php echo $row['Supplier_id']; ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
+                                    <a href="/SDW/KTMeDOIS/staff/vendor/view/<?php echo $row['Supplier_id']; ?>" class="btn btn-sm btn-info"><i class="fas fa-eye"></i> View</a>
+                                    <a href="/SDW/KTMeDOIS/staff/vendor/edit/<?php echo $row['Supplier_id']; ?>" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Edit</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -131,6 +130,10 @@ include __DIR__ . '/../SharedUI/topbar.php';
             </table>
         </div>
         <div class="mt-3"><small class="text-muted"><i class="fas fa-info-circle"></i> Showing <?php echo $filteredCount; ?> record(s) from total <?php echo $stats['total']; ?> vendors</small></div>
+    </div>
+</div>
+<div>
+        <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
 </div>
 
