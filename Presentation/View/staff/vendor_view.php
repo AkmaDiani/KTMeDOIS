@@ -2,15 +2,13 @@
 $title = 'Vendor Profile - KTM eDOIS';
 $showTopbar = true;
 $showSidebar = true;
-include __DIR__ . '/../SharedUI/topbar.php';
-?>
+include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
+include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
 
+?>
+<div class="content">
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Vendor Profile</h1>
-    <div>
-        <a href="/SDW/KTMeDOIS/staff/vendor/edit/<?php echo $id; ?>" class="btn btn-warning me-2"><i class="fas fa-edit"></i> Edit</a>
-        <a href="/SDW/KTMeDOIS/staff/vendor" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
-    </div>
 </div>
 
 <div class="row">
@@ -20,7 +18,7 @@ include __DIR__ . '/../SharedUI/topbar.php';
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6 mb-3"><label class="fw-bold text-muted">Full Name</label>
-                        <p class="h5"><?php echo htmlspecialchars($vendor['Contac_person']); ?></p>
+                        <p class="h5"><?php echo htmlspecialchars($vendor['Contact_person']); ?></p>
                     </div>
                     <div class="col-md-6 mb-3"><label class="fw-bold text-muted">Phone Number</label>
                         <p class="h5"><?php echo htmlspecialchars($vendor['phone']); ?></p>
@@ -82,13 +80,14 @@ include __DIR__ . '/../SharedUI/topbar.php';
             <div class="card-header bg-success text-white"><i class="fas fa-cog"></i> Quick Actions</div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="/SDW/KTMeDOIS/staff/vendor/edit/<?php echo $id; ?>" class="btn btn-warning"><i class="fas fa-edit"></i> Edit Vendor</a>
-                    <a href="/SDW/KTMeDOIS/staff/vendor/delete/<?php echo $id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i> Delete Vendor</a>
-                    <a href="/SDW/KTMeDOIS/staff/vendor" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to List</a>
+                    <a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=vendor_edit&id=<?php echo $id; ?>" class="btn btn-warning"><i class="fas fa-edit"></i> Edit Vendor</a>
+                    <a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=vendor_delete&id=<?php echo $id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i> Delete Vendor</a>
+                    <a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=vendor" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to List</a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <?php include __DIR__ . '/../SharedUI/footer.php'; ?>
