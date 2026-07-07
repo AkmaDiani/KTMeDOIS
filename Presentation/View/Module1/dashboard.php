@@ -7,13 +7,9 @@ include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
 include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
 
 ?>
-
+<div class="content">
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Supplier Dashboard</h1>
-    <div>
-        <span class="badge bg-success"><?php echo $supplier['SUPPLIER_CTC_STATUS']; ?></span>
-        <span class="badge bg-info">ID: <?php echo $supplier['SUPPLIERID']; ?></span>
-    </div>
 </div>
 
 <div class="alert alert-info">
@@ -107,6 +103,7 @@ include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
             </table>
         </div>
     </div>
+</div>
 </div>
 
 <?php include ROOT_PATH . '/Presentation/View/SharedUI/footer.php'; ?>
