@@ -130,4 +130,17 @@ class AuthController
         header('Location: /KTMeDOIS/login');
         exit();
     }
+
+    public function showLogin() {
+        session_start();
+        if (isset($_SESSION['user_id'])) {
+            if ($_SESSION['role'] === 'Vendor') {
+                header('Location: /KTMEDOIS/Presentation/Public/index.php?action=invoice_status');
+            } else {
+                header('Location: /KTMEDOIS/Presentation/Public/index.php?action=invoice_pending');
+            }
+            exit;
+        }
+        include __DIR__ . '/../../Presentation/View/auth/login.php';
+    }
 }
