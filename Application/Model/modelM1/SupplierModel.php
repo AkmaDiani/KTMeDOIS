@@ -1,133 +1,118 @@
 <?php
-// ============================================
-// SUPPLIER MODEL
-// ============================================
+// Application/Model/modelM1/SupplierModel.php
 
 class SupplierModel
 {
-    private $conn;
+    private $pdo;
 
-    public function __construct($conn)
+    public function __construct(PDO $pdo)
     {
-        $this->conn = $conn;
+        $this->pdo = $pdo;
     }
 
     public function getAll()
     {
-        $query = "SELECT * FROM supplier ORDER BY Supplier_id DESC";
-        $result = mysqli_query($this->conn, $query);
-        $data = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $data[] = $row;
-        }
-        return $data;
+        $stmt = $this->pdo->query("SELECT * FROM supplier ORDER BY Supplier_id DESC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getById($id)
     {
-        $id = mysqli_real_escape_string($this->conn, $id);
-        $query = "SELECT * FROM supplier WHERE Supplier_id = '$id'";
-        $result = mysqli_query($this->conn, $query);
-        return mysqli_fetch_assoc($result);
+        $stmt = $this->pdo->prepare("SELECT * FROM supplier WHERE Supplier_id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getByVendorNumber($vendorNumber)
     {
-        $vendorNumber = mysqli_real_escape_string($this->conn, $vendorNumber);
-        $query = "SELECT * FROM supplier WHERE Vendor_Number = '$vendorNumber'";
-        $result = mysqli_query($this->conn, $query);
-        return mysqli_fetch_assoc($result);
+        $stmt = $this->pdo->prepare("SELECT * FROM supplier WHERE Vendor_Number = ?");
+        $stmt->execute([$vendorNumber]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getDOBySupplier($supplierId, $limit = null)
     {
-        $supplierId = mysqli_real_escape_string($this->conn, $supplierId);
-        $query = "SELECT * FROM do WHERE supplier_ID = '$supplierId' ORDER BY created_date DESC";
-        if ($limit) $query .= " LIMIT $limit";
-        $result = mysqli_query($this->conn, $query);
-        $data = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $data[] = $row;
+        $sql = "SELECT * FROM do WHERE supplier_ID = ? ORDER BY created_date DESC";
+        if ($limit) {
+            $sql .= " LIMIT " . intval($limit);
         }
-        return $data;
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$supplierId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function countDO($supplierId, $status = null)
     {
-        $supplierId = mysqli_real_escape_string($this->conn, $supplierId);
-        $where = "supplier_ID = '$supplierId'";
+        $sql = "SELECT COUNT(*) as count FROM do WHERE supplier_ID = ?";
+        $params = [$supplierId];
         if ($status) {
-            $status = mysqli_real_escape_string($this->conn, $status);
-            $where .= " AND Status = '$status'";
+            $sql .= " AND Status = ?";
+            $params[] = $status;
         }
-        $query = "SELECT COUNT(*) as count FROM do WHERE $where";
-        $result = mysqli_query($this->conn, $query);
-        $row = mysqli_fetch_assoc($result);
-        return $row['count'] ?? 0;
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] ?? 0;
     }
 
     public function create($data)
     {
-        $name = mysqli_real_escape_string($this->conn, $data['name']);
-        $contact = mysqli_real_escape_string($this->conn, $data['contact']);
-        $phone = mysqli_real_escape_string($this->conn, $data['phone']);
-        $email = mysqli_real_escape_string($this->conn, $data['email']);
-        $address = mysqli_real_escape_string($this->conn, $data['address']);
-        $status = mysqli_real_escape_string($this->conn, $data['status']);
-
         $vendorNum = rand(10001, 99999);
-
-        $checkQuery = "SELECT Vendor_Number FROM supplier WHERE Vendor_Number = '$vendorNum'";
-        $checkResult = mysqli_query($this->conn, $checkQuery);
-        while (mysqli_num_rows($checkResult) > 0) {
+        $stmt = $this->pdo->prepare("SELECT Vendor_Number FROM supplier WHERE Vendor_Number = ?");
+        $stmt->execute([$vendorNum]);
+        while ($stmt->fetch()) {
             $vendorNum = rand(10001, 99999);
-            $checkResult = mysqli_query($this->conn, "SELECT Vendor_Number FROM supplier WHERE Vendor_Number = '$vendorNum'");
+            $stmt->execute([$vendorNum]);
         }
 
-        $query = "INSERT INTO supplier (Supplier_name, Contac_person, phone, email, status, Billing_address, Vendor_Number) 
-                  VALUES ('$name', '$contact', '$phone', '$email', '$status', '$address', '$vendorNum')";
-
-        if (mysqli_query($this->conn, $query)) {
-            return mysqli_insert_id($this->conn);
+        $sql = "INSERT INTO supplier 
+                    (Supplier_name, Contac_person, phone, email, status, Billing_address, Vendor_Number) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $this->pdo->prepare($sql);
+        if ($stmt->execute([
+            $data['name'],
+            $data['contact'],
+            $data['phone'],
+            $data['email'],
+            $data['status'],
+            $data['address'],
+            $vendorNum
+        ])) {
+            return $this->pdo->lastInsertId();
         }
         return false;
     }
 
     public function update($id, $data)
     {
-        $id = mysqli_real_escape_string($this->conn, $id);
-        $name = mysqli_real_escape_string($this->conn, $data['name']);
-        $contact = mysqli_real_escape_string($this->conn, $data['contact']);
-        $phone = mysqli_real_escape_string($this->conn, $data['phone']);
-        $email = mysqli_real_escape_string($this->conn, $data['email']);
-        $address = mysqli_real_escape_string($this->conn, $data['address']);
-        $status = mysqli_real_escape_string($this->conn, $data['status']);
-
-        $query = "UPDATE supplier SET 
-                   Supplier_name = '$name',
-                   Contac_person = '$contact',
-                   phone = '$phone',
-                   email = '$email',
-                   Billing_address = '$address',
-                   status = '$status'
-                   WHERE Supplier_id = '$id'";
-
-        return mysqli_query($this->conn, $query);
+        $sql = "UPDATE supplier SET 
+                    Supplier_name = ?, Contac_person = ?, phone = ?, email = ?,
+                    Billing_address = ?, status = ?
+                WHERE Supplier_id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            $data['name'],
+            $data['contact'],
+            $data['phone'],
+            $data['email'],
+            $data['address'],
+            $data['status'],
+            $id
+        ]);
     }
 
     public function delete($id)
     {
-        $id = mysqli_real_escape_string($this->conn, $id);
-
-        $checkDO = mysqli_query($this->conn, "SELECT COUNT(*) as count FROM do WHERE supplier_ID = '$id'");
-        $doCount = mysqli_fetch_assoc($checkDO)['count'];
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) as count FROM do WHERE supplier_ID = ?");
+        $stmt->execute([$id]);
+        $doCount = $stmt->fetchColumn();
 
         if ($doCount > 0) {
             return ['success' => false, 'message' => "Cannot delete supplier with $doCount DO records."];
         }
 
-        $query = "DELETE FROM supplier WHERE Supplier_id = '$id'";
-        if (mysqli_query($this->conn, $query)) {
+        $stmt = $this->pdo->prepare("DELETE FROM supplier WHERE Supplier_id = ?");
+        if ($stmt->execute([$id]) && $stmt->rowCount() > 0) {
             return ['success' => true, 'message' => 'Supplier deleted successfully.'];
         }
         return ['success' => false, 'message' => 'Error deleting supplier.'];
@@ -135,16 +120,15 @@ class SupplierModel
 
     public function getStats()
     {
-        $total = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM supplier"))['count'];
-        $active = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM supplier WHERE status = 'Active'"))['count'];
-        $pending = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM supplier WHERE status = 'Pending Verification'"))['count'];
-        $inactive = mysqli_fetch_assoc(mysqli_query($this->conn, "SELECT COUNT(*) as count FROM supplier WHERE status = 'Inactive'"))['count'];
-
-        return [
-            'total' => $total,
-            'active' => $active,
-            'pending' => $pending,
-            'inactive' => $inactive
-        ];
+        $stats = [];
+        $stmt = $this->pdo->query("SELECT COUNT(*) as count FROM supplier");
+        $stats['total'] = $stmt->fetchColumn();
+        $stmt = $this->pdo->query("SELECT COUNT(*) as count FROM supplier WHERE status = 'Active'");
+        $stats['active'] = $stmt->fetchColumn();
+        $stmt = $this->pdo->query("SELECT COUNT(*) as count FROM supplier WHERE status = 'Pending Verification'");
+        $stats['pending'] = $stmt->fetchColumn();
+        $stmt = $this->pdo->query("SELECT COUNT(*) as count FROM supplier WHERE status = 'Inactive'");
+        $stats['inactive'] = $stmt->fetchColumn();
+        return $stats;
     }
 }
