@@ -88,6 +88,47 @@ if ($controller === 'auth') {
         case 'profile':    $supplier->profile(); break;
         default:           $supplier->dashboard();
     }
+
+    } elseif ($controller === 'invoice') {
+    require_once ROOT_PATH . '/Application/Controller/M3/invoiceController.php';
+    $invoice = new InvoiceController($mainPdo, $supplierPdo);
+    switch ($action) {
+        case 'invoice_status':
+            $invoice->status();
+            break;
+        case 'invoice_submit':
+            $invoice->submitForm();
+            break;
+        case 'invoice_submit_post':
+            $invoice->submit();
+            break;
+        case 'invoice_summary':
+            $_GET['id'] = $id;
+            $invoice->invoiceSummary();
+            break;
+        case 'invoice_edit':
+            $_GET['id'] = $id;
+            $invoice->editInvoice();
+            break;
+        case 'invoice_pdf':
+            $invoice->generatePdf($id);
+            break;
+        case 'invoice_preview':
+            $invoice->previewPdf();
+            break;
+        case 'get_do_details':
+            $invoice->getDODetails();
+            break;
+        case 'invoice_pending':
+            $invoice->pendingList();
+            break;
+        case 'invoice_review':
+            $invoice->reviewAction();
+            break;
+        default:
+            $invoice->status();
+    }
+
 } else {
     // fallback to login
     $auth = new AuthController($mainPdo, $supplierPdo);
