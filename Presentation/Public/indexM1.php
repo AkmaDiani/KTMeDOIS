@@ -3,12 +3,31 @@
 
 require_once __DIR__ . '/../../bootstrap.php';
 
-$pdo = Database::getInstance()->getConnection();
+// ------------------------------------------------------------
+// DATABASE CONNECTIONS (PDO)
+// ------------------------------------------------------------
+$host = 'localhost';
+$port = '3306';
+$user = 'root';
+$pass = '';
 
+try {
+    $mainPdo = new PDO("mysql:host=$host;port=$port;dbname=ktm_edois;charset=utf8mb4", $user, $pass);
+    $mainPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$conn_main = $pdo;
-$conn_supplier = $pdo; // or a separate PDO if you set it up
+    $supplierPdo = new PDO("mysql:host=$host;port=$port;dbname=supplier;charset=utf8mb4", $user, $pass);
+    $supplierPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
 
+// Store in globals so helper functions can use them
+$GLOBALS['main_pdo'] = $mainPdo;
+$GLOBALS['supplier_pdo'] = $supplierPdo;
+
+// ------------------------------------------------------------
+// ROUTING PARAMETERS
+// ------------------------------------------------------------
 $url = $_GET['url'] ?? '';
 if (empty($url)) {
     $controller = $_GET['controller'] ?? 'auth';
@@ -21,22 +40,28 @@ if (empty($url)) {
     $id         = $segments[2] ?? null;
 }
 
-// API request handling 
+// ------------------------------------------------------------
+// API REQUEST
+// ------------------------------------------------------------
 if (isset($_GET['api'])) {
-    require_once ROOT_PATH . '/Application/Middleware/API_gateways/SupplierAPI.php';
+    // The SupplierAPI class will be autoloaded
+    $api = new SupplierAPI($mainPdo, $supplierPdo);
+    // You may route to methods based on $_GET['method'] or similar
     exit;
 }
 
-// Route to controllers (autoloader finds them)
+// ------------------------------------------------------------
+// ROUTE TO CONTROLLERS
+// ------------------------------------------------------------
 if ($controller === 'auth') {
-    $auth = new AuthController($conn_main, $conn_supplier);
+    $auth = new AuthController($mainPdo, $supplierPdo);
     switch ($action) {
         case 'login':  $auth->login(); break;
         case 'logout': $auth->logout(); break;
         default:       $auth->login();
     }
 } elseif ($controller === 'staff') {
-    $staff = new StaffController($conn_main);
+    $staff = new StaffController($mainPdo);
     switch ($action) {
         case 'dashboard':     $staff->dashboard(); break;
         case 'profile':       $staff->profile(); break;
@@ -55,7 +80,7 @@ if ($controller === 'auth') {
         default:              $staff->dashboard();
     }
 } elseif ($controller === 'supplier') {
-    $supplier = new SupplierController($conn_main, $conn_supplier);
+    $supplier = new SupplierController($mainPdo, $supplierPdo);
     switch ($action) {
         case 'dashboard':  $supplier->dashboard(); break;
         case 'do':         $supplier->doList(); break;
@@ -64,6 +89,7 @@ if ($controller === 'auth') {
         default:           $supplier->dashboard();
     }
 } else {
-    $auth = new AuthController($conn_main, $conn_supplier);
+    // fallback to login
+    $auth = new AuthController($mainPdo, $supplierPdo);
     $auth->login();
 }
