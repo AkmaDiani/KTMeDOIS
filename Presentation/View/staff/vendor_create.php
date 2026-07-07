@@ -2,12 +2,13 @@
 $title = 'Add Vendor - KTM eDOIS';
 $showTopbar = true;
 $showSidebar = true;
-include __DIR__ . '/../SharedUI/topbar.php';
-?>
+include ROOT_PATH . '/Presentation/View/SharedUI/topbar.php';
+include ROOT_PATH . '/Presentation/View/SharedUI/sidebarM1.php';
 
+?>
+<div class="content">
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Add New Vendor</h1>
-    <a href="/SDW/KTMeDOIS/staff/vendor" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
 </div>
 
 <?php if (isset($success) && $success): ?>
@@ -51,6 +52,7 @@ include __DIR__ . '/../SharedUI/topbar.php';
             </div>
         </form>
     </div>
+</div>
 </div>
 
 <?php include __DIR__ . '/../SharedUI/footer.php'; ?>
