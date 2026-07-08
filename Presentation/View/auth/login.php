@@ -87,11 +87,10 @@ $showSidebar = false;
             <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
 
-        <!-- ✅ FIXED FORM ACTION -->
         <form action="/KTMedOIS/Presentation/Public/indexM1.php?controller=auth&action=login" method="POST">
             <div class="form-group">
-                <label for="username">Username / Email</label>
-                <input type="text" name="username" id="username" class="form-control" placeholder="Enter your username or email" required>
+                <label for="email">Email</label>
+                <input type="text" name="email" id="email" class="form-control" placeholder="Enter your email" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
