@@ -46,7 +46,6 @@ class SupplierController
         $stmt->execute([$supplier_id]);
         $rejectedDO = $stmt->fetchColumn();
 
-        // ❌ Payment table does not exist – set to 0
         $totalPaid = 0;
         $totalPending = 0;
 
