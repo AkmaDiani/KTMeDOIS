@@ -32,24 +32,23 @@ $role = $_SESSION['role'] ?? '';
                     <?php if ($userType === 'staff' || in_array($role, ['KTM Officer', 'Finance Officer', 'Audit Officer', 'System Admin'])): ?>
                         <!-- ===== STAFF MENU ===== -->
                         <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=vendor_registry" class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">Manage Vendor</a></li>
-                        
-                        <li><a href="/KTMeDOIS/Presentation/Public/indexM3.php?action=invoice_status" class="<?= $activePage === 'invoice_status' ? 'active' : '' ?>">Manage Invoice</a></li>
-                        <li><a href="/KTMeDOIS/Presentation/Public/indexM4.php?action=review_document" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Review Documents</a></li>
+                        <li><a href="/KTMeDOIS/Presentation/Public/indexM3.php?action=invoice_pending" class="<?= $activePage === 'invoice_status' ? 'active' : '' ?>">Manage Invoice</a></li>
+                        <li><a href="/KTMeDOIS/Presentation/Public/indexM4.php?action=do_index" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Review Documents</a></li>
                         <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=staff&action=notifications" class="<?= $activePage === 'notifications' ? 'active' : '' ?>">Notifications</a></li>
-                        
+
                     <?php elseif ($userType === 'supplier' || $role === 'Supplier' || $role === 'Vendor'): ?>
-                        <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=supplier&action=vendor_registry" class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">Manage Vendor</a></li>
+                        <!-- ===== SUPPLIER MENU ===== -->
+                        <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=supplier&action=dashboard" class="<?= $activePage === 'manage_vendor' ? 'active' : '' ?>">Manage Vendor</a></li>
                         <li><a href="/KTMeDOIS/Presentation/View/Module2/do_history.php" class="<?= $activePage === 'manage_do' ? 'active' : '' ?>">Manage Delivery Order</a></li>
-                        <li><a href="/KTMeDOIS/Presentation/Public/indexM3.php?action=invoice_status" class="<?= $activePage === 'invoice_status' ? 'active' : '' ?>">Manage Invoice</a></li>
-                        <li><a href="/KTMeDOIS/Presentation/Public/indexM4.php?action=review_document" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Review Documents</a></li>
+                        <li><a href="/KTMeDOIS/Presentation/View/Module3/invoice_status.php" class="<?= $activePage === 'invoice_status' ? 'active' : '' ?>">Manage Invoice</a></li>
+                        <li><a href="/KTMeDOIS/Presentation/Public/indexM4.php?action=do_index" class="<?= $activePage === 'review_document' ? 'active' : '' ?>">Review Documents</a></li>
                         <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=supplier&action=notifications" class="<?= $activePage === 'notifications' ? 'active' : '' ?>">Notifications</a></li>
-                        
+
                     <?php else: ?>
-                        <!-- GUEST -->
+                        <!-- ===== GUEST ===== -->
                         <li><a href="/KTMeDOIS/Presentation/Public/indexM1.php?controller=auth&action=login">Login</a></li>
                     <?php endif; ?>
                     
-                    <!-- Common "User" link (optional) -->
                     <li><a href="#" class="<?= $activePage === 'user' ? 'active' : '' ?>">User</a></li>
                 </ul>
             </nav>
